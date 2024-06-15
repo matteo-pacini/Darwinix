@@ -27,6 +27,10 @@
             linuxPkgs.writeShellScript "efi-format" ''
               #!${linuxPkgs.bash}/bin/bash
               export PATH=${linuxPkgs.gptfdisk}/bin:$PATH
+              if [ -z "$1" ]; then
+                echo "Usage: $0 /dev/sdX"
+                exit 1
+              fi
               sudo sgdisk \
                 -og $1 \
                 -n 1:0:+512M \
@@ -36,13 +40,14 @@
                 -n 3:0:0 \
                 -t 3:8300 \
                 $1
-              sudo partprobe
+              sudo partprobe $1
+              sleep 1
               sudo mkfs.vfat -F 32 ''${1}1
               sudo mkswap ''${1}2
               sudo swapon ''${1}2
               sudo mkfs.xfs ''${1}3
               sudo mount /dev/''${1}3 /mnt
-              sudo mkdir /mnt/boot
+              sudo mkdir -p /mnt/boot
               sudo mount /dev/''${1}1 /mnt/boot
               sudo nixos-generate-config --root /mnt
             ''
