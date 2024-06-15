@@ -45,9 +45,9 @@
               sudo mkswap ''${1}2
               sudo swapon ''${1}2
               sudo mkfs.xfs ''${1}3
-              sudo mount /dev/''${1}3 /mnt
+              sudo mount ''${1}3 /mnt
               sudo mkdir -p /mnt/boot
-              sudo mount /dev/''${1}1 /mnt/boot
+              sudo mount ''${1}1 /mnt/boot
               sudo nixos-generate-config --root /mnt
             ''
           );
