@@ -36,6 +36,7 @@
                 -n 3:0:0 \
                 -t 3:8300 \
                 $1
+              sudo partprobe
               sudo mkfs.vfat -F 32 ''${1}1
               sudo mkswap ''${1}2
               sudo swapon ''${1}2
