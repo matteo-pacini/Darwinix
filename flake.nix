@@ -24,7 +24,7 @@
         nixos-efi-format = {
           type = "app";
           program = toString (
-            linuxPkgs.writeShellScriptBin "efi-format" ''
+            linuxPkgs.writeShellScript "efi-format" ''
               #!${linuxPkgs.bash}/bin/bash
               export PATH=${linuxPkgs.gptfdisk}/bin:$PATH
               sudo sgdisk \
