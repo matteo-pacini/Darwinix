@@ -32,7 +32,7 @@
                 exit 1
               fi
               sudo sgdisk \
-                -og $1 \
+                -og \
                 -n 1:0:+512M \
                 -t 1:ef00 \
                 -n 2:0:+4G \
@@ -41,7 +41,6 @@
                 -t 3:8300 \
                 $1
               sudo partprobe $1
-              sleep 1
               sudo mkfs.vfat -F 32 ''${1}1
               sudo mkswap ''${1}2
               sudo swapon ''${1}2
