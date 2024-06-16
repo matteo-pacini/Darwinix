@@ -3,12 +3,15 @@
 PREFIX=@@prefix@@
 
 # Half of the cores, + 1 if odd
-CORES=$(
+_CORES=$(
     sysctl -n hw.logicalcpu_max | \
     perl -nle 'my $half = $_ / 2; print $half % 2 != 0 ? $half + 1 : $half'
 ) 
 # 1/4 of the RAM
-RAM=$(sysctl -n hw.memsize | perl -nle 'print ($_ / (1024 ** 3) / 4)')
+_RAM=$(sysctl -n hw.memsize | perl -nle 'print ($_ / (1024 ** 3) / 4)')
+
+CORES=${CORES:-$_CORES}
+RAM=${RAM:-$_RAM}
 
 info() {
     gum log --structured --level info "$1"
@@ -52,10 +55,7 @@ qemu-system-aarch64 -M virt,accel=hvf,highmem=on \
                     -smp "$CORES",cores="$CORES",threads=1,sockets=1 \
                     -m "${RAM}G" \
                     -device virtio-gpu-pci \
-                    -display default,show-cursor=on \
-                    -drive if=pflash,format=raw,file=efi.img,readonly=on \
-                    -drive if=pflash,format=raw,file=varstore.img \
-                    -drive if=virtio,format=qcow2,file=disk.qcow2 \
+                    -display cocoa,show-cursor=on \
                     -device virtio-net-pci,netdev=net0 \
                     -netdev user,id=net0 \
                     -device qemu-xhci,id=usb-bus \
@@ -67,5 +67,11 @@ qemu-system-aarch64 -M virt,accel=hvf,highmem=on \
                     -device intel-hda \
                     -device hda-output,audiodev=audiodev \
                     -audiodev driver=coreaudio,id=audiodev \
+                    -device virtio-serial,packed=on,ioeventfd=on \
+                    -device virtserialport,name=com.redhat.spice.0,chardev=vdagent0 \
+                    -chardev qemu-vdagent,id=vdagent0,name=vdagent,clipboard=on,mouse=off \
+                    -drive if=pflash,format=raw,file=efi.img,readonly=on \
+                    -drive if=pflash,format=raw,file=varstore.img \
+                    -drive if=virtio,format=qcow2,file=disk.qcow2 \
                     -cdrom "$PREFIX/share/nixos.iso" \
                     "$@"

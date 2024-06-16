@@ -2,7 +2,7 @@
   description = "Flake for quickly spawning VMs on aarch64-darwin";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/release-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
 
   outputs =
