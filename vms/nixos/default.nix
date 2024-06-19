@@ -19,16 +19,23 @@ let
     url = "https://releases.nixos.org/nixos/24.05/nixos-24.05.1409.cc54fb41d137/nixos-minimal-24.05.1409.cc54fb41d137-aarch64-linux.iso";
     hash = "sha256-nNm3KUBkxS8tgwd52HZgb3bFywb8A12zFEXVn+CnyBU=";
   };
-  thisQemu = qemu.override {
+  partialQemu = qemu.override {
     # Avoid long compiling times by only building aarch64 target
     hostCpuTargets = [ "${stdenvNoCC.hostPlatform.qemuArch}-softmmu" ];
   };
-  finalQemu = thisQemu.overrideAttrs (oldAttrs: {
+  finalQemu = partialQemu.overrideAttrs (oldAttrs: {
     # Filter out patches that disable some advanced Cocoa features,
     # like copy-pasting between host and guest.
     # Min. OS required becomes macOS 11.0, which is the base SDK for `aaarch64-darwin`.
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/applications/virtualization/qemu/default.nix#L116-L137
     patches = filter (patch: !(elem "cocoa" (split "-" (baseNameOf patch)))) oldAttrs.patches;
+    # Optimize for Apple M1 onwards
+    NIX_CFLAGS_COMPILE =
+      [ (oldAttrs.NIX_CFLAGS_COMPILE or "") ]
+      ++ [
+        "-O2"
+        "-mcpu=apple-m1"
+      ];
   });
 in
 stdenvNoCC.mkDerivation {
