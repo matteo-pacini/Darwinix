@@ -33,34 +33,6 @@ Example:
 CORES=2 RAM=4 nix run "github:matteo-pacini/darwinix#nixos"
 ```
 
-### Commands
-
-#### nixos-efi-format
-
-The only command available in Darwinix at the moment is `nixos-efi-format`. This command formats the device passed as an argument with an EFI layout:
-
-- 512MB for the EFI partition
-- 4GB for swap
-- The remaining space for the root partition (`/`)
-
-To use `nixos-efi-format`, run the following command from within the VM, replacing `/dev/sdX` with your target device:
-
-```
-nix run "github:matteo-pacini/darwinix#nixos-efi-format" /dev/[sv]dX
-```
-
-This command will:
-
-1. Create the partitions:
-    - 512MB EFI partition (type `ef00`)
-    - 4GB swap partition (type `8200`)
-    - Remaining space as the root partition (type `8300`)
-2. Format the partitions:
-    - EFI partition as FAT32
-    - Swap partition
-    - Root partition as XFS
-3. Mount the partitions and generate the initial NixOS configuration.
-
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request on GitHub.

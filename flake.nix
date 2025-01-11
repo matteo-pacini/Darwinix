@@ -21,10 +21,6 @@
           type = "app";
           program = "${vms.nixos}/bin/nixos.sh";
         };
-        macos9 = {
-          type = "app";
-          program = "${vms.macos9}/bin/macos9.sh";
-        };
       };
 
     };

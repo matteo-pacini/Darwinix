@@ -1,7 +1,7 @@
 { stdenvNoCC }:
 stdenvNoCC.mkDerivation {
   pname = "aarch64-qemu-efi";
-  version = "unstable-14-06-2024";
+  version = "unstable-11-01-2025";
   src = ./src;
   phases = [ "installPhase" ];
   installPhase = ''
