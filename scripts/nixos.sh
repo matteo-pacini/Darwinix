@@ -17,7 +17,7 @@ RAM=${RAM:-$_RAM}
 GRAPHICS=${GRAPHICS:-1}
 AUDIO=${AUDIO:-1}
 NETWORK=${NETWORK:-1}
-COMPRESS=${COMPRESS:-1}
+COMPRESS=${COMPRESS:-0}
 
 info() {
     gum log --structured --level info "$1"

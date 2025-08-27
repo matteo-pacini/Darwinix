@@ -3,24 +3,23 @@
   aarch64-qemu-efi,
   fetchurl,
   lib,
-  mkQemu,
   perl,
   gum,
   makeWrapper,
+  qemu,
 }:
 let
 
   iso = fetchurl {
-    url = "https://releases.nixos.org/nixos/24.11/nixos-24.11.712512.3f0a8ac25fb6/nixos-minimal-24.11.712512.3f0a8ac25fb6-aarch64-linux.iso";
-    hash = "sha256-gqCyAhnNn4ewCA+h6kAr0PdO/7KDC6wwBF4Kzfasn44=";
+    url = "https://channels.nixos.org/nixos-25.05/latest-nixos-minimal-aarch64-linux.iso";
+    hash = "sha256-50qA6OPt6QXUqCHDqvm6ScP3NPVFfOxyrMh75Bu/Yiw=";
   };
-  qemu = mkQemu { hostCpuTarget = "aarch64-softmmu"; };
 in
 stdenvNoCC.mkDerivation {
 
   pname = "nixos-vm";
-  version = "24.11";
-  src = ../../scripts;
+  version = "25.05";
+  src = ../scripts;
   nativeBuildInputs = [ makeWrapper ];
   phases = [ "installPhase" ];
   installPhase = ''
