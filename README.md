@@ -33,6 +33,36 @@ Example:
 CORES=2 RAM=4 nix run "github:matteo-pacini/darwinix#nixos"
 ```
 
+### Building the ISO
+
+The NixOS ISO is now built dynamically instead of being hardcoded. This allows for customization and ensures you always have the latest configuration.
+
+**Important**: Building the ISO requires a Linux builder since ISOs can only be built on Linux systems. On macOS, you have several options:
+
+#### Option 1: Using nix-darwin's built-in Linux builder
+
+If you're using nix-darwin, you can enable the built-in Linux builder:
+
+```nix
+# In your nix-darwin configuration
+nix.linux-builder.enable = true;
+```
+
+Then rebuild your system:
+```bash
+darwin-rebuild switch
+```
+
+#### Option 2: Using a remote Linux builder
+
+Configure a remote Linux builder in your `~/.config/nix/nix.conf` or `/etc/nix/nix.conf`:
+
+```
+builders = ssh://user@linux-host aarch64-linux
+```
+
+```
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request on GitHub.

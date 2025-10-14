@@ -1,20 +1,13 @@
 {
   stdenvNoCC,
   aarch64-qemu-efi,
-  fetchurl,
+  nixosIso,
   lib,
   perl,
   gum,
   makeWrapper,
   qemu,
 }:
-let
-
-  iso = fetchurl {
-    url = "https://channels.nixos.org/nixos-25.05/latest-nixos-minimal-aarch64-linux.iso";
-    hash = "sha256-50qA6OPt6QXUqCHDqvm6ScP3NPVFfOxyrMh75Bu/Yiw=";
-  };
-in
 stdenvNoCC.mkDerivation {
 
   pname = "nixos-vm";
@@ -31,7 +24,7 @@ stdenvNoCC.mkDerivation {
     chmod +x $out/bin/nixos.sh
     cp -r ${aarch64-qemu-efi}/share/RELEASEAARCH64_QEMU_EFI.fd $out/share
     cp -r ${aarch64-qemu-efi}/share/RELEASEAARCH64_QEMU_VARS.fd $out/share
-    cp ${iso} $out/share/nixos.iso
+    cp ${nixosIso}/iso/*.iso $out/share/nixos.iso
     wrapProgram $out/bin/nixos.sh \
       --prefix PATH : "${
         lib.makeBinPath [
