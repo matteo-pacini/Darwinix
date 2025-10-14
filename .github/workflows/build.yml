@@ -1,0 +1,85 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+
+env:
+  ATTIC_CACHE_NAME: ${{ secrets.ATTIC_CACHE_NAME }}
+  ATTIC_CACHE_URL: ${{ secrets.ATTIC_CACHE_URL }}
+  ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: wimpysworld/nothing-but-nix@v6
+        with:
+          hatchet-protocol: "rampage"
+          witness-carnage: true
+          nix-permission-edict: true
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v34
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Configure Attic cache
+        run: |
+          nix run nixpkgs#attic-client -- login \
+            "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
+          nix run nixpkgs#attic-client -- use darwinix
+
+      - name: Build nixos-iso
+        run: |
+          nix build ".#packages.aarch64-linux.nixos-iso"
+
+      - uses: nick-fields/retry@v3
+        name: Push to Attic cache
+        with:
+          timeout_minutes: 7200
+          max_attempts: 5
+          retry_on: error
+          command: nix run nixpkgs#attic-client -- push darwinix ./result -j 3
+
+  build-vm:
+    needs: build-iso
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v34
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Configure Attic cache
+        run: |
+          nix run nixpkgs#attic-client -- login \
+            "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
+          nix run nixpkgs#attic-client -- use darwinix
+
+      - name: Build nixos-vm
+        run: |
+          nix build ".#packages.aarch64-darwin.nixos-vm"
+
+      - uses: nick-fields/retry@v3
+        name: Push to Attic cache
+        with:
+          timeout_minutes: 7200
+          max_attempts: 5
+          retry_on: error
+          command: nix run nixpkgs#attic-client -- push darwinix ./result -j 3

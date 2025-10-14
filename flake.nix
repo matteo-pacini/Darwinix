@@ -1,6 +1,15 @@
 {
   description = "Flake for quickly spawning VMs on aarch64-darwin";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://zpnixcache.fly.dev/darwinix"
+    ];
+    extra-trusted-public-keys = [
+      "darwinix:QwQIkpmFbPbRjN78oG0sSZX7QghoT8IN5sVXT2OvxJw="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
@@ -43,6 +52,14 @@
       };
     in
     {
+      packages.aarch64-linux = {
+        nixos-iso = nixosIso;
+      };
+
+      packages.aarch64-darwin = {
+        nixos-vm = nixosVM;
+      };
+
       apps.aarch64-darwin = {
         nixos = {
           type = "app";
