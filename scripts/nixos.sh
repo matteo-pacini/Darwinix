@@ -18,6 +18,9 @@ GRAPHICS=${GRAPHICS:-1}
 AUDIO=${AUDIO:-1}
 NETWORK=${NETWORK:-1}
 COMPRESS=${COMPRESS:-0}
+SNAPSHOT=${SNAPSHOT:-0}
+DEBUG=${DEBUG:-0}
+DISK_SIZE=${DISK_SIZE:-512G}
 
 info() {
     gum log --structured --level info "$1"
@@ -26,6 +29,25 @@ info() {
 warn() {
     gum log --structured --level warn "$1"
 }
+
+debug() {
+    if [ "$DEBUG" -eq 1 ]; then
+        gum log --structured --level debug "$1"
+    fi
+}
+
+error() {
+    gum log --structured --level error "$1"
+}
+
+# Cleanup function for temporary files
+cleanup_temp_files() {
+    debug "Cleaning up temporary files..."
+    rm -f /tmp/RELEASEAARCH64_QEMU_EFI.fd /tmp/RELEASEAARCH64_QEMU_VARS.fd
+}
+
+# Set up trap to cleanup on exit
+trap cleanup_temp_files EXIT
 
 if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]]; then
     echo "Usage: <environment> nix run \"github:matteo-pacini/darwinix#nixos\" -- [extra qemu options]"
@@ -36,7 +58,10 @@ if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]]; then
     echo "  GRAPHICS: enable graphics support (default: 1)"
     echo "  AUDIO: enable audio support (default: 1)"
     echo "  NETWORK: enable network support (default: 1)"
-    echo "  COMPRESS: compress disk image after shutdown (default: 1)"
+    echo "  COMPRESS: compress disk image after shutdown (default: 0)"
+    echo "  SNAPSHOT: run without committing disk changes (default: 0)"
+    echo "  DEBUG: enable debug logging (default: 0)"
+    echo "  DISK_SIZE: initial disk size (default: 512G, only used when disk is first created)"
     exit 0
 fi
 
@@ -48,38 +73,73 @@ info "Using $CORES cores and $RAM GB of RAM"
 sleep 1
 
 if [ ! -f efi.img ]; then
-    gum spin --title "EFI image not found, creating one..." -- \
-    sleep 1 && \
-    truncate -s 64m efi.img && \
-    dd if=$PREFIX/share/RELEASEAARCH64_QEMU_EFI.fd of=efi.img conv=notrunc > /dev/null 2>&1
-else 
-    info "efi.img found, skipping creation..."
+    info "EFI image not found, creating one..."
+
+    # Download EFI firmware
+    EFI_URL="https://retrage.github.io/edk2-nightly/bin/RELEASEAARCH64_QEMU_EFI.fd"
+    EFI_TEMP="/tmp/RELEASEAARCH64_QEMU_EFI.fd"
+
+    debug "Downloading EFI firmware from $EFI_URL..."
+    if ! curl -fsSL -o "$EFI_TEMP" "$EFI_URL"; then
+        error "Failed to download EFI firmware from $EFI_URL. Please check your internet connection."
+        exit 1
+    fi
+    debug "EFI firmware downloaded successfully"
+
+    # Create EFI image
+    debug "Creating efi.img..."
+    truncate -s 64m efi.img
+    dd if="$EFI_TEMP" of=efi.img conv=notrunc > /dev/null 2>&1
+    debug "efi.img created successfully"
+
+    # Cleanup is handled by trap
+else
+    debug "efi.img found, skipping creation..."
 fi
 
 if [ ! -f varstore.img ]; then
-    gum spin --title "EFI vars image not found, creating one..." -- \
-    sleep 1 && \
+    info "EFI vars image not found, creating one..."
+
+    # Download EFI vars firmware
+    VARS_URL="https://retrage.github.io/edk2-nightly/bin/RELEASEAARCH64_QEMU_VARS.fd"
+    VARS_TEMP="/tmp/RELEASEAARCH64_QEMU_VARS.fd"
+
+    debug "Downloading EFI vars firmware from $VARS_URL..."
+    if ! curl -fsSL -o "$VARS_TEMP" "$VARS_URL"; then
+        error "Failed to download EFI vars firmware from $VARS_URL. Please check your internet connection."
+        exit 1
+    fi
+    debug "EFI vars firmware downloaded successfully"
+
+    # Create varstore image
+    debug "Creating varstore.img..."
     truncate -s 64m varstore.img
+    dd if="$VARS_TEMP" of=varstore.img conv=notrunc > /dev/null 2>&1
+    debug "varstore.img created successfully"
+
+    # Cleanup is handled by trap
 else
-    info "varstore.img found, skipping creation..."
+    debug "varstore.img found, skipping creation..."
 fi
 
 if [ ! -f disk.qcow2 ]; then
-    gum spin --title "Disk image not found, creating one..." -- \
-    qemu-img create -f qcow2 disk.qcow2 512G
+    info "Disk image not found, creating one ($DISK_SIZE)..."
+    debug "Creating disk.qcow2 ($DISK_SIZE)..."
+    qemu-img create -f qcow2 disk.qcow2 "$DISK_SIZE"
+    debug "disk.qcow2 created successfully"
 else
-    info "disk.qcow2 found, skipping creation..."
+    debug "disk.qcow2 found, skipping creation..."
 fi
 
 # shellcheck disable=SC2054
 args=(
+    -nodefaults
     -M virt,accel=hvf,highmem=on
     --cpu max
     -smp "$CORES",cores="$CORES",threads=1,sockets=1
     -m "${RAM}G"
+    -rtc base=utc,clock=host
     -device qemu-xhci,id=usb-bus
-    -device usb-tablet,bus=usb-bus.0
-    -device usb-mouse,bus=usb-bus.0
     -device usb-kbd,bus=usb-bus.0
     -device virtio-rng-pci
     -device virtio-balloon-pci
@@ -93,13 +153,14 @@ if [ "$GRAPHICS" -eq 1 ]; then
     info "Enabling graphics and qemu-vdagent support..."
     # shellcheck disable=SC2054
     args+=(
+        -device usb-tablet,bus=usb-bus.0
         -device virtio-gpu-pci
         -display cocoa,show-cursor=on
         -device virtio-serial,packed=on,ioeventfd=on
         -device virtserialport,name=com.redhat.spice.0,chardev=vdagent0
-        -chardev qemu-vdagent,id=vdagent0,name=vdagent,clipboard=on,mouse=off
+        -chardev qemu-vdagent,id=vdagent0,name=vdagent,clipboard=on,mouse=on
     )
-else 
+else
     warn "Disabling graphics..."
     warn "To exit, press Ctrl + A, then X"
     sleep 3
@@ -131,6 +192,13 @@ if [ "$NETWORK" -eq 1 ]; then
 else
     warn "Running without network support..."
 fi
+
+if [ "$SNAPSHOT" -eq 1 ]; then
+    info "Running in snapshot mode (disk changes will not be saved)..."
+    args+=(-snapshot)
+fi
+
+info "QEMU command: qemu-system-aarch64 ${args[*]} $*"
 
 qemu-system-aarch64 "${args[@]}" "$@"
 

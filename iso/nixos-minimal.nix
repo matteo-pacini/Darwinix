@@ -1,10 +1,8 @@
 # Minimal NixOS ISO configuration for aarch64
 # This configuration is used to build a custom ISO image on the fly
 {
-  config,
-  pkgs,
-  lib,
   modulesPath,
+  pkgs,
   ...
 }:
 {
@@ -19,4 +17,12 @@
   # Ensure we're building for aarch64
   nixpkgs.hostPlatform = "aarch64-linux";
 
+  # Enable experimental features for flakes and nix-command
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
+  # Enable disko for disk partitioning
+  environment.systemPackages = [ pkgs.disko ];
 }

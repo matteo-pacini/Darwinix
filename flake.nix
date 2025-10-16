@@ -12,13 +12,20 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { self, nixpkgs }:
+    {
+      self,
+      nixpkgs,
+      disko,
+    }:
     let
       pkgs = import nixpkgs { system = "aarch64-darwin"; };
-      aarch64-qemu-efi = pkgs.callPackage ./packages/aarch64-qemu-efi/default.nix { };
       optimizedForAppleSilicon =
         pkg:
         pkg.overrideAttrs (oldAttrs: {
@@ -33,7 +40,10 @@
       # Note: This requires a Linux builder to build from macOS
       nixosIsoSystem = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
-        modules = [ ./iso/nixos-minimal.nix ];
+        modules = [
+          ./iso/nixos-minimal.nix
+          disko.nixosModules.disko
+        ];
       };
 
       # Build the ISO image
@@ -41,7 +51,7 @@
 
       # VM package that uses the dynamically built ISO
       nixosVM = pkgs.callPackage ./vms/nixos.nix {
-        inherit aarch64-qemu-efi nixosIso;
+        inherit nixosIso;
         qemu = (
           optimizedForAppleSilicon (
             pkgs.qemu.override {

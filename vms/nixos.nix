@@ -1,12 +1,12 @@
 {
   stdenvNoCC,
-  aarch64-qemu-efi,
   nixosIso,
   lib,
   perl,
   gum,
   makeWrapper,
   qemu,
+  curl,
 }:
 stdenvNoCC.mkDerivation {
 
@@ -22,8 +22,6 @@ stdenvNoCC.mkDerivation {
     substituteInPlace $out/bin/nixos.sh \
       --replace-fail "@@prefix@@" "\"$out\""
     chmod +x $out/bin/nixos.sh
-    cp -r ${aarch64-qemu-efi}/share/RELEASEAARCH64_QEMU_EFI.fd $out/share
-    cp -r ${aarch64-qemu-efi}/share/RELEASEAARCH64_QEMU_VARS.fd $out/share
     cp ${nixosIso}/iso/*.iso $out/share/nixos.iso
     wrapProgram $out/bin/nixos.sh \
       --prefix PATH : "${
@@ -31,6 +29,7 @@ stdenvNoCC.mkDerivation {
           qemu
           perl
           gum
+          curl
         ]
       }"
   '';
