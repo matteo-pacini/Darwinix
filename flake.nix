@@ -49,16 +49,24 @@
       # Build the ISO image
       nixosIso = nixosIsoSystem.config.system.build.isoImage;
 
-      # VM package that uses the dynamically built ISO
-      nixosVM = pkgs.callPackage ./vms/nixos.nix {
-        inherit nixosIso;
-        qemu = (
-          optimizedForAppleSilicon (
-            pkgs.qemu.override {
-              hostCpuOnly = true;
-            }
-          )
-        );
+      qemu = (
+        optimizedForAppleSilicon (
+          pkgs.qemu.override {
+            hostCpuOnly = true;
+          }
+        )
+      );
+
+      # Generic Linux VM package that supports multiple distributions
+      nixosVM = pkgs.callPackage ./vms/linux.nix {
+        inherit nixosIso qemu;
+        distribution = "nixos";
+      };
+
+      # Ubuntu VM package (ISO fetched at runtime)
+      ubuntuVM = pkgs.callPackage ./vms/linux.nix {
+        inherit qemu;
+        distribution = "ubuntu-25-10";
       };
     in
     {
@@ -67,13 +75,18 @@
       };
 
       packages.aarch64-darwin = {
-        nixos-vm = nixosVM;
+        nixosVM = nixosVM;
+        ubuntuVM = ubuntuVM;
       };
 
       apps.aarch64-darwin = {
         nixos = {
           type = "app";
-          program = "${nixosVM}/bin/nixos.sh";
+          program = "${nixosVM}/bin/linux.sh";
+        };
+        ubuntu-25-10 = {
+          type = "app";
+          program = "${ubuntuVM}/bin/linux.sh";
         };
       };
 
