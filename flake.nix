@@ -57,17 +57,23 @@
         )
       );
 
+      # Read ISO sources configuration
+      isoSources = builtins.fromJSON (builtins.readFile ./iso-sources.json);
+
       # Generic Linux VM package that supports multiple distributions
       nixosVM = pkgs.callPackage ./vms/linux.nix {
         inherit nixosIso qemu;
         distribution = "nixos";
       };
 
-      # Ubuntu VM package (ISO fetched at runtime)
-      ubuntuVM = pkgs.callPackage ./vms/linux.nix {
-        inherit qemu;
-        distribution = "ubuntu-25-10";
-      };
+      # Dynamically generate VM packages for each distribution in iso-sources.json
+      distributionVMs = nixpkgs.lib.mapAttrs (
+        distribution: _config:
+        pkgs.callPackage ./vms/linux.nix {
+          inherit qemu;
+          inherit distribution;
+        }
+      ) isoSources;
     in
     {
       packages.aarch64-linux = {
@@ -75,20 +81,20 @@
       };
 
       packages.aarch64-darwin = {
-        nixosVM = nixosVM;
-        ubuntuVM = ubuntuVM;
-      };
+        nixos = nixosVM;
+      }
+      // distributionVMs;
 
       apps.aarch64-darwin = {
         nixos = {
           type = "app";
           program = "${nixosVM}/bin/linux.sh";
         };
-        ubuntu-25-10 = {
-          type = "app";
-          program = "${ubuntuVM}/bin/linux.sh";
-        };
-      };
+      }
+      // (nixpkgs.lib.mapAttrs (distribution: vm: {
+        type = "app";
+        program = "${vm}/bin/linux.sh";
+      }) distributionVMs);
 
     };
 }

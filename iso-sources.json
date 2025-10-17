@@ -2,6 +2,10 @@
   "ubuntu-25-10": {
     "url": "https://cdimage.ubuntu.com/ubuntu/releases/25.10/release/ubuntu-25.10-desktop-arm64.iso",
     "filename": "ubuntu-25.10-desktop-arm64.iso"
+  },
+  "fedora-workstation-42": {
+    "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Workstation/aarch64/iso/Fedora-Workstation-Live-42-1.1.aarch64.iso",
+    "filename": "Fedora-Workstation-Live-42-1.1.aarch64.iso"
   }
 }
 
