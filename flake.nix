@@ -57,23 +57,10 @@
         )
       );
 
-      # Read ISO sources configuration
-      isoSources = builtins.fromJSON (builtins.readFile ./iso-sources.json);
-
-      # Generic Linux VM package that supports multiple distributions
-      nixosVM = pkgs.callPackage ./vms/linux.nix {
+      # Generic Linux VM package that supports all distributions
+      linuxVM = pkgs.callPackage ./vms/linux.nix {
         inherit nixosIso qemu;
-        distribution = "nixos";
       };
-
-      # Dynamically generate VM packages for each distribution in iso-sources.json
-      distributionVMs = nixpkgs.lib.mapAttrs (
-        distribution: _config:
-        pkgs.callPackage ./vms/linux.nix {
-          inherit qemu;
-          inherit distribution;
-        }
-      ) isoSources;
     in
     {
       packages.aarch64-linux = {
@@ -81,20 +68,15 @@
       };
 
       packages.aarch64-darwin = {
-        nixos = nixosVM;
-      }
-      // distributionVMs;
+        linux-vm = linuxVM;
+      };
 
       apps.aarch64-darwin = {
-        nixos = {
+        linux-vm = {
           type = "app";
-          program = "${nixosVM}/bin/linux.sh";
+          program = "${linuxVM}/bin/linux.sh";
         };
-      }
-      // (nixpkgs.lib.mapAttrs (distribution: vm: {
-        type = "app";
-        program = "${vm}/bin/linux.sh";
-      }) distributionVMs);
+      };
 
     };
 }

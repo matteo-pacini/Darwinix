@@ -54,13 +54,6 @@ jobs:
   build-vm:
     needs: build-iso
     runs-on: macos-latest
-    strategy:
-      matrix:
-        package:
-          - nixos
-          - ubuntu-25-10
-          - fedora-workstation-42
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,9 +71,9 @@ jobs:
             "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
           nix run nixpkgs#attic-client -- use darwinix
 
-      - name: Build ${{ matrix.package }}
+      - name: Build linux-vm
         run: |
-          nix build ".#packages.aarch64-darwin.${{ matrix.package }}"
+          nix build ".#packages.aarch64-darwin.linux-vm"
 
       - uses: nick-fields/retry@v3
         name: Push to Attic cache

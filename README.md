@@ -8,29 +8,30 @@ Darwinix supports the following Linux distributions:
 
 | OS | Version | Command | ISO Source |
 |---|---|---|---|
-| **NixOS** | Latest (unstable) | `nix run "github:matteo-pacini/darwinix#nixos"` | Pre-built during flake evaluation |
-| **Ubuntu** | 25.10 (Desktop) | `nix run "github:matteo-pacini/darwinix#ubuntu-25-10"` | Downloaded at runtime from CDImage |
+| **NixOS** | Latest (unstable) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos` | Pre-built during flake evaluation |
+| **Ubuntu** | 25.10 (Desktop) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- ubuntu-25-10` | Downloaded at runtime from CDImage |
+| **Fedora** | Workstation 42 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-42` | Downloaded at runtime from Fedora |
 
 ## Usage
 
 ### VMs
 
-You can spawn a VM using one of the commands listed above. For example, to create a NixOS VM:
+You can spawn a VM by specifying the distribution name as an argument. For example, to create a NixOS VM:
 
 ```
-nix run "github:matteo-pacini/darwinix#nixos"
+nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos
 ```
 
 This command will create the necessary VM files locally if they are not found (e.g., EFI, EFI varstore, disk, etc.) and then start the VM.
 
-**Note**: On first run, the EFI firmware files will be automatically downloaded from [edk2-nightly](https://retrage.github.io/edk2-nightly/). For distributions like Ubuntu that fetch ISOs at runtime, the ISO will also be downloaded on first run. An internet connection is required for the initial setup.
+**Note**: On first run, the EFI firmware files will be automatically downloaded from [edk2-nightly](https://retrage.github.io/edk2-nightly/). For distributions like Ubuntu and Fedora that fetch ISOs at runtime, the ISO will also be downloaded on first run. An internet connection is required for the initial setup.
 
-**Faster Downloads**: For non-NixOS distributions like Ubuntu, ISOs are downloaded using `aria2c` with multiple concurrent connections, which significantly speeds up the download process.
+**Faster Downloads**: For non-NixOS distributions like Ubuntu and Fedora, ISOs are downloaded using `aria2c` with multiple concurrent connections, which significantly speeds up the download process.
 
-You can pass additional arguments directly to QEMU. For example:
+You can pass additional arguments directly to QEMU after the distribution name. For example:
 
 ```
-nix run "github:matteo-pacini/darwinix#nixos" -- -cdrom "/path/to/image.iso"
+nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos -cdrom "/path/to/image.iso"
 ```
 
 VMs come with internet access, audio support, and clipboard sharing between your Mac and the VM.
@@ -38,13 +39,13 @@ VMs come with internet access, audio support, and clipboard sharing between your
 You can customize the VM configuration using environment variables. To see all available options, run:
 
 ```
-nix run "github:matteo-pacini/darwinix#nixos" -- --help
+nix run "github:matteo-pacini/darwinix#linux-vm" -- --help
 ```
 
 Example:
 
 ```
-CORES=2 RAM=4 nix run "github:matteo-pacini/darwinix#nixos"
+CORES=2 RAM=4 nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos
 ```
 
 #### Disk Size Configuration
@@ -52,7 +53,7 @@ CORES=2 RAM=4 nix run "github:matteo-pacini/darwinix#nixos"
 Use the `DISK_SIZE` environment variable to set the initial disk size (default: `512G`). This only applies when creating the disk for the first time:
 
 ```
-DISK_SIZE=1T nix run "github:matteo-pacini/darwinix#nixos"
+DISK_SIZE=1T nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos
 ```
 
 **Note**: Once the disk is created, changing `DISK_SIZE` won't affect it. If you want a different size, delete the `disk.qcow2` file and run the command again.

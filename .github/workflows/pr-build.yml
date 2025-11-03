@@ -57,13 +57,6 @@ jobs:
   pr-build-vm:
     needs: pr-build-iso
     runs-on: macos-latest
-    strategy:
-      matrix:
-        package:
-          - nixos
-          - ubuntu-25-10
-          - fedora-workstation-42
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,17 +74,17 @@ jobs:
             "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
           nix run nixpkgs#attic-client -- use darwinix
 
-      - name: Build latest ${{ matrix.package }}
+      - name: Build latest linux-vm
         run: |
-          nix build "github:matteo-pacini/darwinix#packages.aarch64-darwin.${{ matrix.package }}" --out-link ./old-result
+          nix build "github:matteo-pacini/darwinix#packages.aarch64-darwin.linux-vm" --out-link ./old-result
 
-      - name: Build new ${{ matrix.package }}
+      - name: Build new linux-vm
         run: |
-          nix build ".#packages.aarch64-darwin.${{ matrix.package }}" --out-link ./result
+          nix build ".#packages.aarch64-darwin.linux-vm" --out-link ./result
 
-      - name: Compare ${{ matrix.package }} builds
+      - name: Compare linux-vm builds
         run: |
-          echo "## ${{ matrix.package }} Diff" >> "$GITHUB_STEP_SUMMARY"
+          echo "## linux-vm Diff" >> "$GITHUB_STEP_SUMMARY"
           echo '```diff' >> "$GITHUB_STEP_SUMMARY"
           nix run github:faukah/dix -- ./old-result ./result >> "$GITHUB_STEP_SUMMARY" || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"

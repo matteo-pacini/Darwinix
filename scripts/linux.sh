@@ -3,13 +3,20 @@
 set -eo pipefail
 
 PREFIX=@@prefix@@
-DISTRIBUTION=@@distribution@@
+
+# Get distribution from first argument, default to nixos
+DISTRIBUTION="${1:-nixos}"
+
+# Shift arguments so remaining args are passed to QEMU
+if [ $# -gt 0 ]; then
+    shift
+fi
 
 # Half of the cores, + 1 if odd
 _CORES=$(
     sysctl -n hw.logicalcpu_max | \
     perl -nle 'my $half = $_ / 2; print $half % 2 != 0 ? $half + 1 : $half'
-) 
+)
 # 1/4 of the RAM
 _RAM=$(sysctl -n hw.memsize | perl -nle 'print ($_ / (1024 ** 3) / 4)')
 
@@ -50,8 +57,13 @@ cleanup_temp_files() {
 # Set up trap to cleanup on exit
 trap cleanup_temp_files EXIT
 
-if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]]; then
-    echo "Usage: <environment> nix run \"github:matteo-pacini/darwinix#${DISTRIBUTION}\" -- [extra qemu options]"
+if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]] || [[ "${DISTRIBUTION}" == "-h" ]] || [[ "${DISTRIBUTION}" == "--help" ]]; then
+    echo "Usage: nix run \"github:matteo-pacini/darwinix#linux-vm\" -- <distribution> [extra qemu options]"
+    echo
+    echo "Available distributions:"
+    echo "  nixos                   - NixOS (pre-built ISO)"
+    echo "  ubuntu-25-10            - Ubuntu 25.10 Desktop"
+    echo "  fedora-workstation-42   - Fedora Workstation 42"
     echo
     echo "Environment variables:"
     echo "  CORES: number of cores to use (default: $_CORES)"
