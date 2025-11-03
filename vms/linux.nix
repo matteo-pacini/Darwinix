@@ -23,7 +23,7 @@ stdenvNoCC.mkDerivation {
     cp $src/linux.sh $out/bin
     patchShebangs $out/bin/linux.sh
     substituteInPlace $out/bin/linux.sh \
-      --replace-fail "@@prefix@@" "\"$out\""
+      --replace-fail "@@store-path@@" "\"$out\""
     chmod +x $out/bin/linux.sh
 
     # Copy ISO sources configuration

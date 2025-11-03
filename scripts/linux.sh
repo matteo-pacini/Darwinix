@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-PREFIX=@@prefix@@
+STORE_PATH=@@store-path@@
 
 # Get distribution from first argument, default to nixos
 DISTRIBUTION="${1:-nixos}"
@@ -131,7 +131,7 @@ fi
 
 # Handle ISO based on distribution - all distributions fetch ISO at runtime
 ISO_PATH=""
-ISO_CONFIG_FILE="$PREFIX/share/iso-sources.json"
+ISO_CONFIG_FILE="$STORE_PATH/share/iso-sources.json"
 
 if [ ! -f "$ISO_CONFIG_FILE" ]; then
     error "ISO sources configuration file not found at $ISO_CONFIG_FILE"
