@@ -161,14 +161,16 @@ ISO_PATH="$ISO_FILENAME"
 if [ ! -f "$ISO_PATH" ]; then
     info "ISO not found, downloading ${DISTRIBUTION}..."
     debug "Downloading from: $ISO_URL"
+    debug "Saving as: $ISO_FILENAME"
 
     # Use aria2c with multiple connections for faster downloads
     # -x 16: max 16 connections per server
     # -k 1M: minimum split size of 1MB
     # -s 16: max 16 simultaneous connections
+    # -o: output filename (handles redirects and renames to our desired filename)
     # --allow-overwrite=true: allow overwriting existing files
     # --auto-file-renaming=false: don't rename files
-    if ! aria2c -x 16 -k 1M -s 16 --allow-overwrite=true --auto-file-renaming=false "$ISO_URL"; then
+    if ! aria2c -x 16 -k 1M -s 16 -o "$ISO_FILENAME" --allow-overwrite=true --auto-file-renaming=false "$ISO_URL"; then
         error "Failed to download ISO from $ISO_URL. Please check your internet connection."
         rm -f "$ISO_PATH"
         exit 1
