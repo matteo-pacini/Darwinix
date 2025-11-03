@@ -1,4 +1,8 @@
 {
+  "nixos": {
+    "url": "https://channels.nixos.org/nixos-25.05/latest-nixos-minimal-aarch64-linux.iso",
+    "filename": "nixos-minimal-aarch64-linux.iso"
+  },
   "ubuntu-25-10": {
     "url": "https://cdimage.ubuntu.com/ubuntu/releases/25.10/release/ubuntu-25.10-desktop-arm64.iso",
     "filename": "ubuntu-25.10-desktop-arm64.iso"

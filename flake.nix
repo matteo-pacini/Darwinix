@@ -12,17 +12,12 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    disko = {
-      url = "github:nix-community/disko";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
     {
       self,
       nixpkgs,
-      disko,
     }:
     let
       pkgs = import nixpkgs { system = "aarch64-darwin"; };
@@ -35,20 +30,6 @@
           };
         });
 
-      # NixOS ISO configuration
-      # This builds a minimal NixOS ISO for aarch64-linux
-      # Note: This requires a Linux builder to build from macOS
-      nixosIsoSystem = nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
-        modules = [
-          ./iso/nixos-minimal.nix
-          disko.nixosModules.disko
-        ];
-      };
-
-      # Build the ISO image
-      nixosIso = nixosIsoSystem.config.system.build.isoImage;
-
       qemu = (
         optimizedForAppleSilicon (
           pkgs.qemu.override {
@@ -59,14 +40,10 @@
 
       # Generic Linux VM package that supports all distributions
       linuxVM = pkgs.callPackage ./vms/linux.nix {
-        inherit nixosIso qemu;
+        inherit qemu;
       };
     in
     {
-      packages.aarch64-linux = {
-        nixos-iso = nixosIso;
-      };
-
       packages.aarch64-darwin = {
         linux-vm = linuxVM;
       };

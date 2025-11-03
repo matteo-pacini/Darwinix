@@ -1,6 +1,5 @@
 {
   stdenvNoCC,
-  nixosIso ? null,
   lib,
   perl,
   gum,
@@ -29,11 +28,6 @@ stdenvNoCC.mkDerivation {
 
     # Copy ISO sources configuration
     cp $isoSourcesJson $out/share/iso-sources.json
-
-    # Include the pre-built NixOS ISO if provided
-    ${lib.optionalString (nixosIso != null) ''
-      cp ${nixosIso}/iso/*.iso $out/share/nixos.iso
-    ''}
 
     wrapProgram $out/bin/linux.sh \
       --prefix PATH : "${
