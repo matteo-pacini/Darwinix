@@ -8,7 +8,7 @@ Darwinix supports the following Linux distributions:
 
 | OS | Version | Command | ISO Source |
 |---|---|---|---|
-| **NixOS** | Latest (unstable) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos` | Pre-built during flake evaluation |
+| **NixOS** | 25.05 (Minimal) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos` | Downloaded at runtime from NixOS |
 | **Ubuntu** | 25.10 (Desktop) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- ubuntu-25-10` | Downloaded at runtime from CDImage |
 | **Fedora** | Workstation 42 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-42` | Downloaded at runtime from Fedora |
 
@@ -24,9 +24,9 @@ nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos
 
 This command will create the necessary VM files locally if they are not found (e.g., EFI, EFI varstore, disk, etc.) and then start the VM.
 
-**Note**: On first run, the EFI firmware files will be automatically downloaded from [edk2-nightly](https://retrage.github.io/edk2-nightly/). For distributions like Ubuntu and Fedora that fetch ISOs at runtime, the ISO will also be downloaded on first run. An internet connection is required for the initial setup.
+**Note**: On first run, the EFI firmware files will be automatically downloaded from [edk2-nightly](https://retrage.github.io/edk2-nightly/). All distribution ISOs (including NixOS) are downloaded at runtime on first use. An internet connection is required for the initial setup.
 
-**Faster Downloads**: For non-NixOS distributions like Ubuntu and Fedora, ISOs are downloaded using `aria2c` with multiple concurrent connections, which significantly speeds up the download process.
+**Faster Downloads**: ISOs are downloaded using `aria2c` with multiple concurrent connections, which significantly speeds up the download process.
 
 You can pass additional arguments directly to QEMU after the distribution name. For example:
 
@@ -57,35 +57,6 @@ DISK_SIZE=1T nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos
 ```
 
 **Note**: Once the disk is created, changing `DISK_SIZE` won't affect it. If you want a different size, delete the `disk.qcow2` file and run the command again.
-
-### Building the NixOS ISO
-
-The NixOS ISO is built dynamically with:
-- Flakes and nix-command enabled
-- Disko for disk partitioning
-
-**Note**: ISOs can only be built on Linux, so you'll need a Linux builder. Here are your options:
-
-#### Option 1: nix-darwin's Linux builder
-
-If you use nix-darwin, enable the built-in Linux builder:
-
-```nix
-nix.linux-builder.enable = true;
-```
-
-Then run:
-```bash
-darwin-rebuild switch
-```
-
-#### Option 2: Remote Linux builder
-
-Point to a remote Linux machine in your Nix config (`~/.config/nix/nix.conf` or `/etc/nix/nix.conf`):
-
-```
-builders = ssh://user@linux-host aarch64-linux
-```
 
 ## Contributing
 

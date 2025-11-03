@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-PREFIX=@@prefix@@
+STORE_PATH=@@store-path@@
 
 # Get distribution from first argument, default to nixos
 DISTRIBUTION="${1:-nixos}"
@@ -61,7 +61,7 @@ if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]] || [[ "${DISTRIBUTION}" == "
     echo "Usage: nix run \"github:matteo-pacini/darwinix#linux-vm\" -- <distribution> [extra qemu options]"
     echo
     echo "Available distributions:"
-    echo "  nixos                   - NixOS (pre-built ISO)"
+    echo "  nixos                   - NixOS Minimal"
     echo "  ubuntu-25-10            - Ubuntu 25.10 Desktop"
     echo "  fedora-workstation-42   - Fedora Workstation 42"
     echo
@@ -129,65 +129,53 @@ else
     debug "varstore.img found, skipping creation..."
 fi
 
-# Handle ISO based on distribution
+# Handle ISO based on distribution - all distributions fetch ISO at runtime
 ISO_PATH=""
+ISO_CONFIG_FILE="$STORE_PATH/share/iso-sources.json"
 
-if [ "${DISTRIBUTION}" = "nixos" ]; then
-    # NixOS uses pre-built ISO from Nix store
-    ISO_PATH="$PREFIX/share/nixos.iso"
-    if [ ! -f "$ISO_PATH" ]; then
-        error "NixOS ISO not found at $ISO_PATH"
+if [ ! -f "$ISO_CONFIG_FILE" ]; then
+    error "ISO sources configuration file not found at $ISO_CONFIG_FILE"
+    exit 1
+fi
+
+# Look up distribution in JSON configuration
+ISO_ENTRY=$(jq -r ".\"${DISTRIBUTION}\"" "$ISO_CONFIG_FILE" 2>/dev/null)
+
+if [ "$ISO_ENTRY" = "null" ] || [ -z "$ISO_ENTRY" ]; then
+    error "Distribution '${DISTRIBUTION}' not found in ISO sources configuration"
+    error "Available distributions: $(jq -r 'keys | join(", ")' "$ISO_CONFIG_FILE")"
+    exit 1
+fi
+
+# Extract ISO metadata from JSON
+ISO_FILENAME=$(echo "$ISO_ENTRY" | jq -r '.filename')
+ISO_URL=$(echo "$ISO_ENTRY" | jq -r '.url')
+
+if [ -z "$ISO_FILENAME" ] || [ -z "$ISO_URL" ]; then
+    error "Invalid ISO configuration for distribution '${DISTRIBUTION}'"
+    exit 1
+fi
+
+ISO_PATH="$ISO_FILENAME"
+
+if [ ! -f "$ISO_PATH" ]; then
+    info "ISO not found, downloading ${DISTRIBUTION}..."
+    debug "Downloading from: $ISO_URL"
+
+    # Use aria2c with multiple connections for faster downloads
+    # -x 16: max 16 connections per server
+    # -k 1M: minimum split size of 1MB
+    # -s 16: max 16 simultaneous connections
+    # --allow-overwrite=true: allow overwriting existing files
+    # --auto-file-renaming=false: don't rename files
+    if ! aria2c -x 16 -k 1M -s 16 --allow-overwrite=true --auto-file-renaming=false "$ISO_URL"; then
+        error "Failed to download ISO from $ISO_URL. Please check your internet connection."
+        rm -f "$ISO_PATH"
         exit 1
     fi
-    debug "Using NixOS ISO from Nix store: $ISO_PATH"
+    info "ISO downloaded successfully: $ISO_PATH"
 else
-    # For other distributions, fetch ISO at runtime using configuration from iso-sources.json
-    ISO_CONFIG_FILE="$PREFIX/share/iso-sources.json"
-
-    if [ ! -f "$ISO_CONFIG_FILE" ]; then
-        error "ISO sources configuration file not found at $ISO_CONFIG_FILE"
-        exit 1
-    fi
-
-    # Look up distribution in JSON configuration
-    ISO_ENTRY=$(jq -r ".\"${DISTRIBUTION}\"" "$ISO_CONFIG_FILE" 2>/dev/null)
-
-    if [ "$ISO_ENTRY" = "null" ] || [ -z "$ISO_ENTRY" ]; then
-        error "Distribution '${DISTRIBUTION}' not found in ISO sources configuration"
-        error "Available distributions: $(jq -r 'keys | join(", ")' "$ISO_CONFIG_FILE")"
-        exit 1
-    fi
-
-    # Extract ISO metadata from JSON
-    ISO_FILENAME=$(echo "$ISO_ENTRY" | jq -r '.filename')
-    ISO_URL=$(echo "$ISO_ENTRY" | jq -r '.url')
-
-    if [ -z "$ISO_FILENAME" ] || [ -z "$ISO_URL" ]; then
-        error "Invalid ISO configuration for distribution '${DISTRIBUTION}'"
-        exit 1
-    fi
-
-    ISO_PATH="$ISO_FILENAME"
-
-    if [ ! -f "$ISO_PATH" ]; then
-        info "ISO not found, downloading ${DISTRIBUTION}..."
-        debug "Downloading from: $ISO_URL"
-
-        # Use aria2c with multiple connections for faster downloads
-        # -x 16: max 16 connections per server
-        # -k 1M: minimum split size of 1MB
-        # -s 16: max 16 simultaneous connections
-        # --allow-overwrite=true: allow overwriting existing files
-        # --auto-file-renaming=false: don't rename files
-        if ! aria2c -x 16 -k 1M -s 16 --allow-overwrite=true --auto-file-renaming=false "$ISO_URL"; then
-            error "Failed to download ISO from $ISO_URL. Please check your internet connection."
-            rm -f "$ISO_PATH"
-            exit 1
-        fi
-        info "ISO downloaded successfully: $ISO_PATH"
-    else
-        debug "ISO found, skipping download: $ISO_PATH"
-    fi
+    debug "ISO found, skipping download: $ISO_PATH"
 fi
 
 # Create disk image if needed
