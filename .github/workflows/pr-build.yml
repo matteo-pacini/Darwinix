@@ -1,0 +1,97 @@
+name: Build & Diff PR System
+
+on:
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ATTIC_CACHE_NAME: ${{ secrets.ATTIC_CACHE_NAME }}
+  ATTIC_CACHE_URL: ${{ secrets.ATTIC_CACHE_URL }}
+  ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+
+jobs:
+  pr-build-iso:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: wimpysworld/nothing-but-nix@v6
+        with:
+          hatchet-protocol: "rampage"
+          witness-carnage: true
+          nix-permission-edict: true
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v34
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Configure Attic cache
+        run: |
+          nix run nixpkgs#attic-client -- login \
+            "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
+          nix run nixpkgs#attic-client -- use darwinix
+
+      - name: Build latest ISO
+        run: |
+          nix build "github:matteo-pacini/darwinix#packages.aarch64-linux.nixos-iso" --out-link ./old-result
+
+      - name: Build new ISO
+        run: |
+          nix build ".#packages.aarch64-linux.nixos-iso" --out-link ./result
+
+      - name: Compare ISO builds
+        run: |
+          echo "## ISO Diff" >> "$GITHUB_STEP_SUMMARY"
+          echo '```diff' >> "$GITHUB_STEP_SUMMARY"
+          nix run github:faukah/dix -- ./old-result ./result >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+  pr-build-vm:
+    needs: pr-build-iso
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        package:
+          - nixos
+          - ubuntu-25-10
+          - fedora-workstation-42
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v34
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Configure Attic cache
+        run: |
+          nix run nixpkgs#attic-client -- login \
+            "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
+          nix run nixpkgs#attic-client -- use darwinix
+
+      - name: Build latest ${{ matrix.package }}
+        run: |
+          nix build "github:matteo-pacini/darwinix#packages.aarch64-darwin.${{ matrix.package }}" --out-link ./old-result
+
+      - name: Build new ${{ matrix.package }}
+        run: |
+          nix build ".#packages.aarch64-darwin.${{ matrix.package }}" --out-link ./result
+
+      - name: Compare ${{ matrix.package }} builds
+        run: |
+          echo "## ${{ matrix.package }} Diff" >> "$GITHUB_STEP_SUMMARY"
+          echo '```diff' >> "$GITHUB_STEP_SUMMARY"
+          nix run github:faukah/dix -- ./old-result ./result >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

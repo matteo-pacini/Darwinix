@@ -1,0 +1,82 @@
+name: Weekly Nix Flake Update
+
+on:
+  schedule:
+    - cron: "0 0 * * 5" # Midnight UTC on Fridays
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  ATTIC_CACHE_NAME: ${{ secrets.ATTIC_CACHE_NAME }}
+  ATTIC_CACHE_URL: ${{ secrets.ATTIC_CACHE_URL }}
+  ATTIC_TOKEN: ${{ secrets.ATTIC_TOKEN }}
+
+jobs:
+  update-flake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v34
+        with:
+          nix_conf: |
+            keep-env-derivations = true
+            keep-outputs = true
+
+      - name: Configure Attic cache
+        run: |
+          nix run nixpkgs#attic-client -- login \
+            "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
+          nix run nixpkgs#attic-client -- use darwinix
+
+      - name: Update flake inputs
+        run: nix flake update
+
+      - name: Check for nixpkgs changes
+        id: check_changes
+        run: |
+          if git diff flake.lock | grep -A 20 '"nixpkgs"' | grep -q '^\+'; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate update summary
+        if: steps.check_changes.outputs.has_changes == 'true'
+        id: summary
+        run: |
+          {
+            echo "## Nixpkgs Updated"
+            echo ""
+            echo "The nixpkgs input has been updated to the latest version."
+            echo ""
+            echo "### Changes:"
+            echo '```diff'
+            git diff flake.lock | grep -A 5 -B 5 "nixpkgs"
+            echo '```'
+          } > /tmp/pr_body.md
+          cat /tmp/pr_body.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Create pull request
+        if: steps.check_changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "chore: weekly flake update - ${{ github.event.repository.updated_at }}"
+          title: "chore: weekly flake update - ${{ github.event.repository.updated_at }}"
+          body-path: /tmp/pr_body.md
+          branch: automated/flake-update-${{ github.run_number }}
+          base: master
+          delete-branch: true
+
+      - name: No changes
+        if: steps.check_changes.outputs.has_changes == 'false'
+        run: |
+          echo "No flake input updates available"
