@@ -35,7 +35,7 @@ jobs:
 
       - name: Build latest linux-vm
         run: |
-          nix build "github:matteo-pacini/darwinix#packages.aarch64-darwin.linux-vm" --out-link ./old-result
+          nix build "github:matteo-pacini/darwinix#packages.aarch64-darwin.linux-vm" --no-update-lock-file --out-link ./old-result
 
       - name: Build new linux-vm
         run: |
