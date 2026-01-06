@@ -1,6 +1,6 @@
 {
-  "nixos": {
-    "url": "https://channels.nixos.org/nixos-25.05/latest-nixos-minimal-aarch64-linux.iso",
+  "nixos-25-11": {
+    "url": "https://channels.nixos.org/nixos-25.11/latest-nixos-minimal-aarch64-linux.iso",
     "filename": "nixos-minimal-aarch64-linux.iso"
   },
   "ubuntu-25-10": {
@@ -10,6 +10,14 @@
   "fedora-workstation-42": {
     "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Workstation/aarch64/iso/Fedora-Workstation-Live-42-1.1.aarch64.iso",
     "filename": "Fedora-Workstation-Live-42-1.1.aarch64.iso"
+  },
+  "fedora-workstation-43": {
+    "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Workstation/aarch64/iso/Fedora-Workstation-Live-43-1.6.aarch64.iso",
+    "filename": "Fedora-Workstation-Live-43-1.6.aarch64.iso"
+  },
+  "gentoo": {
+    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260104T233056Z/install-arm64-minimal-20260104T233056Z.iso",
+    "filename": "install-arm64-minimal-20260104T233056Z.iso"
   }
 }
 

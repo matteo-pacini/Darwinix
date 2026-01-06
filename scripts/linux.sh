@@ -4,8 +4,8 @@ set -eo pipefail
 
 STORE_PATH=@@store-path@@
 
-# Get distribution from first argument, default to nixos
-DISTRIBUTION="${1:-nixos}"
+# Get distribution from first argument, default to nixos-25-11
+DISTRIBUTION="${1:-nixos-25-11}"
 
 # Shift arguments so remaining args are passed to QEMU
 if [ $# -gt 0 ]; then
@@ -61,9 +61,11 @@ if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]] || [[ "${DISTRIBUTION}" == "
     echo "Usage: nix run \"github:matteo-pacini/darwinix#linux-vm\" -- <distribution> [extra qemu options]"
     echo
     echo "Available distributions:"
-    echo "  nixos                   - NixOS Minimal"
+    echo "  nixos-25-11             - NixOS 25.11 Minimal"
     echo "  ubuntu-25-10            - Ubuntu 25.10 Desktop"
     echo "  fedora-workstation-42   - Fedora Workstation 42"
+    echo "  fedora-workstation-43   - Fedora Workstation 43"
+    echo "  gentoo                  - Gentoo Minimal"
     echo
     echo "Environment variables:"
     echo "  CORES: number of cores to use (default: $_CORES)"
@@ -209,15 +211,12 @@ args=(
 )
 
 if [ "$GRAPHICS" -eq 1 ]; then
-    info "Enabling graphics and qemu-vdagent support..."
+    info "Enabling graphics..."
     # shellcheck disable=SC2054
     args+=(
         -device usb-tablet,bus=usb-bus.0
         -device virtio-gpu-pci
         -display cocoa,show-cursor=on
-        -device virtio-serial,packed=on,ioeventfd=on
-        -device virtserialport,name=com.redhat.spice.0,chardev=vdagent0
-        -chardev qemu-vdagent,id=vdagent0,name=vdagent,clipboard=on,mouse=on
     )
 else
     warn "Disabling graphics..."
