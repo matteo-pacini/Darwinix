@@ -22,6 +22,8 @@ COMPRESS=${COMPRESS:-0}
 SNAPSHOT=${SNAPSHOT:-0}
 DEBUG=${DEBUG:-0}
 DISK_SIZE=${DISK_SIZE:-512G}
+# "${VAR-default}" (not ":-") so HOSTFWD="" disables forwarding
+HOSTFWD=${HOSTFWD-hostfwd=tcp::2222-:22}
 
 info() {
     gum log --structured --level info "$1"
@@ -61,6 +63,7 @@ usage() {
     echo "  SNAPSHOT: run without committing disk changes (default: 0)"
     echo "  DEBUG: enable debug logging (default: 0)"
     echo "  DISK_SIZE: initial disk size (default: 512G, only used when disk is first created)"
+    echo "  HOSTFWD: user-mode port forwards for the netdev (default: hostfwd=tcp::2222-:22, set to \"\" to disable)"
 }
 
 for arg in "$@"; do
@@ -106,6 +109,11 @@ for flag in GRAPHICS AUDIO NETWORK COMPRESS SNAPSHOT DEBUG; do
     fi
 done
 
+if [ -n "$HOSTFWD" ] && ! [[ "$HOSTFWD" =~ ^hostfwd=[^[:space:]]+$ ]]; then
+    error "HOSTFWD must look like 'hostfwd=tcp::2222-:22' (got: '$HOSTFWD')"
+    exit 1
+fi
+
 clear
 
 info "Starting ${DISTRIBUTION} VM..."
@@ -145,6 +153,7 @@ fi
 # Extract ISO metadata from JSON
 ISO_FILENAME=$(echo "$ISO_ENTRY" | jq -r '.filename // empty')
 ISO_URL=$(echo "$ISO_ENTRY" | jq -r '.url // empty')
+ISO_SHA256=$(echo "$ISO_ENTRY" | jq -r '.sha256 // empty')
 
 if [ -z "$ISO_FILENAME" ] || [ -z "$ISO_URL" ]; then
     error "Invalid ISO configuration for distribution '${DISTRIBUTION}'"
@@ -181,6 +190,21 @@ if [ ! -f "$ISO_PATH" ]; then
         exit 1
     fi
     info "ISO downloaded successfully: $ISO_PATH"
+
+    if [ -n "$ISO_SHA256" ]; then
+        info "Verifying ISO checksum..."
+        ACTUAL_SHA256=$(sha256sum "$ISO_PATH" | cut -d' ' -f1)
+        if [ "$ACTUAL_SHA256" != "$ISO_SHA256" ]; then
+            error "ISO checksum mismatch for $ISO_PATH"
+            error "Expected: $ISO_SHA256"
+            error "Actual:   $ACTUAL_SHA256"
+            rm -f "$ISO_PATH"
+            exit 1
+        fi
+        info "ISO checksum verified"
+    else
+        warn "No checksum available for ${DISTRIBUTION}, skipping verification..."
+    fi
 else
     debug "ISO found, skipping download: $ISO_PATH"
 fi
@@ -245,10 +269,18 @@ fi
 
 if [ "$NETWORK" -eq 1 ]; then
     info "Enabling network support..."
+    NETDEV="user,id=net0"
+    if [ -n "$HOSTFWD" ]; then
+        NETDEV="$NETDEV,$HOSTFWD"
+        info "Port forwarding: $HOSTFWD"
+        if [[ "$HOSTFWD" == *"tcp::2222-:22"* ]]; then
+            info "SSH into the guest with: ssh -p 2222 <user>@127.0.0.1"
+        fi
+    fi
     # shellcheck disable=SC2054
     args+=(
         -device virtio-net-pci,netdev=net0
-        -netdev user,id=net0
+        -netdev "$NETDEV"
     )
 else
     warn "Running without network support..."

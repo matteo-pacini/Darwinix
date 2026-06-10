@@ -12,7 +12,9 @@ Darwinix supports the following Linux distributions:
 | **Ubuntu** | 25.10 (Desktop) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- ubuntu-25-10` | Downloaded at runtime from CDImage |
 | **Fedora** | Workstation 42 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-42` | Downloaded at runtime from Fedora |
 | **Fedora** | Workstation 43 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-43` | Downloaded at runtime from Fedora |
-| **Gentoo** | Minimal | `nix run "github:matteo-pacini/darwinix#linux-vm" -- gentoo` | Downloaded at runtime from Gentoo |
+| **Gentoo** | Minimal (latest autobuild) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- gentoo` | Downloaded at runtime from Gentoo |
+
+ISO downloads are verified against SHA-256 checksums pinned in `iso-sources.json`. Rolling sources (NixOS channel, Gentoo autobuilds) are refreshed weekly by CI.
 
 ## Usage
 
@@ -37,6 +39,23 @@ nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11 -cdrom "/path/to
 ```
 
 VMs come with internet access and audio support.
+
+#### SSH access
+
+Guest port 22 is forwarded to host port 2222 by default (once an SSH server is running in the guest):
+
+```
+ssh -p 2222 <user>@127.0.0.1
+```
+
+Customize or disable with the `HOSTFWD` environment variable:
+
+```
+HOSTFWD="hostfwd=tcp::2222-:22,hostfwd=tcp::8080-:80" nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11
+HOSTFWD="" nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11   # disable
+```
+
+**Note**: each forwarded host port can only be bound by one VM at a time — for a second concurrent VM, pick different ports or set `HOSTFWD=""`.
 
 You can customize the VM configuration using environment variables. To see all available options, run:
 

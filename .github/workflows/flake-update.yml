@@ -39,10 +39,13 @@ jobs:
       - name: Update flake inputs
         run: nix flake update
 
-      - name: Check for nixpkgs changes
+      - name: Refresh rolling ISO sources
+        run: ./update-iso-sources.sh
+
+      - name: Check for changes
         id: check_changes
         run: |
-          if git diff --name-only flake.lock | grep -q .; then
+          if git diff --name-only flake.lock iso-sources.json | grep -q .; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
           else
             echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -53,13 +56,13 @@ jobs:
         id: summary
         run: |
           {
-            echo "## Nixpkgs Updated"
+            echo "## Weekly Update"
             echo ""
-            echo "The nixpkgs input has been updated to the latest version."
+            echo "Flake inputs and rolling ISO sources refreshed."
             echo ""
             echo "### Changes:"
             echo '```diff'
-            git diff flake.lock | grep -A 5 -B 5 "nixpkgs"
+            git diff flake.lock iso-sources.json
             echo '```'
           } > /tmp/pr_body.md
           cat /tmp/pr_body.md >> $GITHUB_STEP_SUMMARY

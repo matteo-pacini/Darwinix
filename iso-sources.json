@@ -1,23 +1,27 @@
 {
   "nixos-25-11": {
     "url": "https://channels.nixos.org/nixos-25.11/latest-nixos-minimal-aarch64-linux.iso",
-    "filename": "nixos-minimal-aarch64-linux.iso"
+    "filename": "nixos-minimal-aarch64-linux.iso",
+    "sha256": "162b1d9f2cbf6eafa63f584d730e220a0bb31c17b2fbb17b25dab198d59210be"
   },
   "ubuntu-25-10": {
     "url": "https://cdimage.ubuntu.com/ubuntu/releases/25.10/release/ubuntu-25.10-desktop-arm64.iso",
-    "filename": "ubuntu-25.10-desktop-arm64.iso"
+    "filename": "ubuntu-25.10-desktop-arm64.iso",
+    "sha256": "9d383dd57220dec520fdec3be05da258d27d435c02fe6e296c5d0a505741a787"
   },
   "fedora-workstation-42": {
     "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Workstation/aarch64/iso/Fedora-Workstation-Live-42-1.1.aarch64.iso",
-    "filename": "Fedora-Workstation-Live-42-1.1.aarch64.iso"
+    "filename": "Fedora-Workstation-Live-42-1.1.aarch64.iso",
+    "sha256": "954a0d7d6553fdf2b6bcf7f393a2e41f9265a0a81de8c8e4f712f5924e40577f"
   },
   "fedora-workstation-43": {
     "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Workstation/aarch64/iso/Fedora-Workstation-Live-43-1.6.aarch64.iso",
-    "filename": "Fedora-Workstation-Live-43-1.6.aarch64.iso"
+    "filename": "Fedora-Workstation-Live-43-1.6.aarch64.iso",
+    "sha256": "73e91eb64022b59ed0b19fb706dc2053034dc0abbaec03f59fc7754a29777cfb"
   },
   "gentoo": {
-    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260104T233056Z/install-arm64-minimal-20260104T233056Z.iso",
-    "filename": "install-arm64-minimal-20260104T233056Z.iso"
+    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260607T234631Z/install-arm64-minimal-20260607T234631Z.iso",
+    "filename": "install-arm64-minimal-20260607T234631Z.iso",
+    "sha256": "4c738d898d4f32d0ba81da0ee8161405832f140bbef48943ddf675d9ba2bbc76"
   }
 }
-

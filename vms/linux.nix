@@ -8,6 +8,7 @@
   pv,
   jq,
   aria2,
+  coreutils,
 }:
 stdenvNoCC.mkDerivation {
 
@@ -38,6 +39,7 @@ stdenvNoCC.mkDerivation {
           pv
           jq
           aria2
+          coreutils
         ]
       }"
   '';
