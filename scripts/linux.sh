@@ -180,7 +180,12 @@ if [ ! -f "$ISO_PATH" ]; then
     # -o: output filename (handles redirects and renames to our desired filename)
     # --allow-overwrite=true: allow overwriting existing files
     # --auto-file-renaming=false: don't rename files
-    if ! aria2c -x 16 -k 1M -s 16 -o "$ISO_FILENAME" --allow-overwrite=true --auto-file-renaming=false "$ISO_URL"; then
+    # --console-log-level=warn / --download-result=hide: keep the progress
+    # bar but silence the NOTICE chatter and the result table
+    if ! aria2c -x 16 -k 1M -s 16 -o "$ISO_FILENAME" \
+        --allow-overwrite=true --auto-file-renaming=false \
+        --console-log-level=warn --download-result=hide \
+        "$ISO_URL"; then
         error "Failed to download ISO from $ISO_URL. Please check your internet connection."
         rm -f "$ISO_PATH"
         exit 1
@@ -209,7 +214,7 @@ fi
 if [ ! -f disk.qcow2 ]; then
     info "Disk image not found, creating one ($DISK_SIZE)..."
     debug "Creating disk.qcow2 ($DISK_SIZE)..."
-    qemu-img create -f qcow2 disk.qcow2 "$DISK_SIZE"
+    qemu-img create -q -f qcow2 disk.qcow2 "$DISK_SIZE"
     debug "disk.qcow2 created successfully"
 else
     debug "disk.qcow2 found, skipping creation..."
