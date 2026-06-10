@@ -26,7 +26,7 @@ nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11
 
 This command will create the necessary VM files locally if they are not found (e.g., EFI, EFI varstore, disk, etc.) and then start the VM.
 
-**Note**: On first run, the EFI firmware files will be automatically downloaded from [edk2-nightly](https://retrage.github.io/edk2-nightly/). All distribution ISOs (including NixOS) are downloaded at runtime on first use. An internet connection is required for the initial setup.
+**Note**: EFI firmware comes bundled with the packaged QEMU — no separate download. All distribution ISOs (including NixOS) are downloaded at runtime on first use. An internet connection is required for the initial setup.
 
 **Faster Downloads**: ISOs are downloaded using `aria2c` with multiple concurrent connections, which significantly speeds up the download process.
 
@@ -36,7 +36,7 @@ You can pass additional arguments directly to QEMU after the distribution name. 
 nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11 -cdrom "/path/to/image.iso"
 ```
 
-VMs come with internet access, audio support, and clipboard sharing between your Mac and the VM.
+VMs come with internet access and audio support.
 
 You can customize the VM configuration using environment variables. To see all available options, run:
 

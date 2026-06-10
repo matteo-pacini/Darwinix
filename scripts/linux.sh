@@ -1,24 +1,17 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -euo pipefail
 
 STORE_PATH=@@store-path@@
-
-# Get distribution from first argument, default to nixos-25-11
-DISTRIBUTION="${1:-nixos-25-11}"
-
-# Shift arguments so remaining args are passed to QEMU
-if [ $# -gt 0 ]; then
-    shift
-fi
+QEMU_SHARE=@@qemu-share@@
 
 # Half of the cores, + 1 if odd
 _CORES=$(
     sysctl -n hw.logicalcpu_max | \
     perl -nle 'my $half = $_ / 2; print $half % 2 != 0 ? $half + 1 : $half'
 )
-# 1/4 of the RAM
-_RAM=$(sysctl -n hw.memsize | perl -nle 'print ($_ / (1024 ** 3) / 4)')
+# 1/4 of the RAM (whole GBs, minimum 1)
+_RAM=$(sysctl -n hw.memsize | perl -nle 'my $r = int($_ / (1024 ** 3) / 4); print $r < 1 ? 1 : $r')
 
 CORES=${CORES:-$_CORES}
 RAM=${RAM:-$_RAM}
@@ -48,16 +41,7 @@ error() {
     gum log --structured --level error "$1"
 }
 
-# Cleanup function for temporary files
-cleanup_temp_files() {
-    debug "Cleaning up temporary files..."
-    rm -f /tmp/RELEASEAARCH64_QEMU_EFI.fd /tmp/RELEASEAARCH64_QEMU_VARS.fd
-}
-
-# Set up trap to cleanup on exit
-trap cleanup_temp_files EXIT
-
-if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]] || [[ "${DISTRIBUTION}" == "-h" ]] || [[ "${DISTRIBUTION}" == "--help" ]]; then
+usage() {
     echo "Usage: nix run \"github:matteo-pacini/darwinix#linux-vm\" -- <distribution> [extra qemu options]"
     echo
     echo "Available distributions:"
@@ -77,8 +61,50 @@ if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]] || [[ "${DISTRIBUTION}" == "
     echo "  SNAPSHOT: run without committing disk changes (default: 0)"
     echo "  DEBUG: enable debug logging (default: 0)"
     echo "  DISK_SIZE: initial disk size (default: 512G, only used when disk is first created)"
-    exit 0
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+    esac
+done
+
+# First argument is the distribution unless it looks like a QEMU flag
+DISTRIBUTION="nixos-25-11"
+if [ $# -gt 0 ]; then
+    case "$1" in
+        ""|-*) ;;
+        *)
+            DISTRIBUTION="$1"
+            shift
+            ;;
+    esac
 fi
+
+if ! [[ "$CORES" =~ ^[1-9][0-9]*$ ]]; then
+    error "CORES must be a positive integer (got: '$CORES')"
+    exit 1
+fi
+
+if ! [[ "$RAM" =~ ^[1-9][0-9]*$ ]]; then
+    error "RAM must be a positive integer in GB (got: '$RAM')"
+    exit 1
+fi
+
+if ! [[ "$DISK_SIZE" =~ ^[0-9]+[KMGT]?$ ]]; then
+    error "DISK_SIZE must be a positive integer with an optional K/M/G/T suffix (got: '$DISK_SIZE')"
+    exit 1
+fi
+
+for flag in GRAPHICS AUDIO NETWORK COMPRESS SNAPSHOT DEBUG; do
+    if [[ "${!flag}" != 0 && "${!flag}" != 1 ]]; then
+        error "$flag must be 0 or 1 (got: '${!flag}')"
+        exit 1
+    fi
+done
 
 clear
 
@@ -87,45 +113,12 @@ info "Using $CORES cores and $RAM GB of RAM"
 
 sleep 1
 
-# Download EFI firmware if needed
-if [ ! -f efi.img ]; then
-    info "EFI image not found, creating one..."
-
-    EFI_URL="https://retrage.github.io/edk2-nightly/bin/RELEASEAARCH64_QEMU_EFI.fd"
-    EFI_TEMP="/tmp/RELEASEAARCH64_QEMU_EFI.fd"
-
-    debug "Downloading EFI firmware from $EFI_URL..."
-    if ! curl -fsSL -o "$EFI_TEMP" "$EFI_URL"; then
-        error "Failed to download EFI firmware from $EFI_URL. Please check your internet connection."
-        exit 1
-    fi
-    debug "EFI firmware downloaded successfully"
-
-    debug "Creating efi.img..."
-    truncate -s 64m efi.img
-    dd if="$EFI_TEMP" of=efi.img conv=notrunc > /dev/null 2>&1
-    debug "efi.img created successfully"
-else
-    debug "efi.img found, skipping creation..."
-fi
-
-# Download EFI vars firmware if needed
+# EFI firmware code is read directly from the QEMU package; only the
+# variable store needs a local writable copy
 if [ ! -f varstore.img ]; then
     info "EFI vars image not found, creating one..."
-
-    VARS_URL="https://retrage.github.io/edk2-nightly/bin/RELEASEAARCH64_QEMU_VARS.fd"
-    VARS_TEMP="/tmp/RELEASEAARCH64_QEMU_VARS.fd"
-
-    debug "Downloading EFI vars firmware from $VARS_URL..."
-    if ! curl -fsSL -o "$VARS_TEMP" "$VARS_URL"; then
-        error "Failed to download EFI vars firmware from $VARS_URL. Please check your internet connection."
-        exit 1
-    fi
-    debug "EFI vars firmware downloaded successfully"
-
-    debug "Creating varstore.img..."
-    truncate -s 64m varstore.img
-    dd if="$VARS_TEMP" of=varstore.img conv=notrunc > /dev/null 2>&1
+    cp "$QEMU_SHARE/edk2-arm-vars.fd" varstore.img
+    chmod u+w varstore.img
     debug "varstore.img created successfully"
 else
     debug "varstore.img found, skipping creation..."
@@ -141,7 +134,7 @@ if [ ! -f "$ISO_CONFIG_FILE" ]; then
 fi
 
 # Look up distribution in JSON configuration
-ISO_ENTRY=$(jq -r ".\"${DISTRIBUTION}\"" "$ISO_CONFIG_FILE" 2>/dev/null)
+ISO_ENTRY=$(jq -r --arg dist "$DISTRIBUTION" '.[$dist]' "$ISO_CONFIG_FILE" 2>/dev/null)
 
 if [ "$ISO_ENTRY" = "null" ] || [ -z "$ISO_ENTRY" ]; then
     error "Distribution '${DISTRIBUTION}' not found in ISO sources configuration"
@@ -150,11 +143,21 @@ if [ "$ISO_ENTRY" = "null" ] || [ -z "$ISO_ENTRY" ]; then
 fi
 
 # Extract ISO metadata from JSON
-ISO_FILENAME=$(echo "$ISO_ENTRY" | jq -r '.filename')
-ISO_URL=$(echo "$ISO_ENTRY" | jq -r '.url')
+ISO_FILENAME=$(echo "$ISO_ENTRY" | jq -r '.filename // empty')
+ISO_URL=$(echo "$ISO_ENTRY" | jq -r '.url // empty')
 
 if [ -z "$ISO_FILENAME" ] || [ -z "$ISO_URL" ]; then
     error "Invalid ISO configuration for distribution '${DISTRIBUTION}'"
+    exit 1
+fi
+
+if ! [[ "$ISO_FILENAME" =~ ^[A-Za-z0-9._-]+$ ]]; then
+    error "Invalid ISO filename in configuration: '$ISO_FILENAME'"
+    exit 1
+fi
+
+if [[ "$ISO_URL" != https://* ]]; then
+    error "ISO URL must use https:// (got: '$ISO_URL')"
     exit 1
 fi
 
@@ -204,7 +207,7 @@ args=(
     -device usb-kbd,bus=usb-bus.0
     -device virtio-rng-pci
     -device virtio-balloon-pci
-    -drive if=pflash,format=raw,file=efi.img,readonly=on
+    -drive if=pflash,format=raw,file="$QEMU_SHARE"/edk2-aarch64-code.fd,readonly=on
     -drive if=pflash,format=raw,file=varstore.img
     -drive if=virtio,format=qcow2,file=disk.qcow2
     -cdrom "$ISO_PATH"

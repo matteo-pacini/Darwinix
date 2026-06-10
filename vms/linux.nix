@@ -5,7 +5,6 @@
   gum,
   makeWrapper,
   qemu,
-  curl,
   pv,
   jq,
   aria2,
@@ -23,7 +22,8 @@ stdenvNoCC.mkDerivation {
     cp $src/linux.sh $out/bin
     patchShebangs $out/bin/linux.sh
     substituteInPlace $out/bin/linux.sh \
-      --replace-fail "@@store-path@@" "\"$out\""
+      --replace-fail "@@store-path@@" "\"$out\"" \
+      --replace-fail "@@qemu-share@@" "\"${qemu}/share/qemu\""
     chmod +x $out/bin/linux.sh
 
     # Copy ISO sources configuration
@@ -35,7 +35,6 @@ stdenvNoCC.mkDerivation {
           qemu
           perl
           gum
-          curl
           pv
           jq
           aria2
