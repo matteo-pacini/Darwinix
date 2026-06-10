@@ -31,7 +31,7 @@ jobs:
         run: |
           nix run nixpkgs#attic-client -- login \
             "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
-          nix run nixpkgs#attic-client -- use darwinix
+          nix run nixpkgs#attic-client -- use main
 
       - name: Build linux-vm
         run: |
@@ -43,4 +43,4 @@ jobs:
           timeout_minutes: 7200
           max_attempts: 5
           retry_on: error
-          command: nix run nixpkgs#attic-client -- push darwinix ./result -j 3
+          command: nix run nixpkgs#attic-client -- push main ./result -j 3

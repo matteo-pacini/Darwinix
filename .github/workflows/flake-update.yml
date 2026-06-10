@@ -34,7 +34,7 @@ jobs:
         run: |
           nix run nixpkgs#attic-client -- login \
             "${{ env.ATTIC_CACHE_NAME }}" "${{ env.ATTIC_CACHE_URL }}" "${{ env.ATTIC_TOKEN }}"
-          nix run nixpkgs#attic-client -- use darwinix
+          nix run nixpkgs#attic-client -- use main
 
       - name: Update flake inputs
         run: nix flake update
