@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Refresh the rolling entries in iso-sources.json:
-# - nixos-25-11: channel URL is stable but its content moves; refresh sha256
+# - nixos-*: channel URLs are stable but their content moves; refresh sha256
 # - gentoo: autobuild snapshots disappear; resolve the latest build and
 #   refresh url, filename and sha256 together
 # Pinned entries (Ubuntu, Fedora) are left untouched.
@@ -24,11 +24,18 @@ require_sha256() {
     [[ "$1" =~ ^[0-9a-f]{64}$ ]] || die "$2: expected a sha256 hash, got '$1'"
 }
 
-# --- nixos-25-11 ---
-NIXOS_SHA_URL="https://channels.nixos.org/nixos-25.11/latest-nixos-minimal-aarch64-linux.iso.sha256"
-NIXOS_SHA=$(curl -fsSL "$NIXOS_SHA_URL" | awk '{print $1; exit}')
-require_sha256 "$NIXOS_SHA" "nixos-25-11"
-echo "nixos-25-11: sha256 $NIXOS_SHA"
+# --- nixos channels (entry-key:channel-name) ---
+for entry in "nixos-26-05:nixos-26.05" "nixos-unstable:nixos-unstable"; do
+    key=${entry%%:*}
+    channel=${entry#*:}
+    sha_url="https://channels.nixos.org/$channel/latest-nixos-minimal-aarch64-linux.iso.sha256"
+    sha=$(curl -fsSL "$sha_url" | awk '{print $1; exit}')
+    require_sha256 "$sha" "$key"
+    echo "$key: sha256 $sha"
+    jq --arg key "$key" --arg sha "$sha" '.[$key].sha256 = $sha' \
+        "$ISO_SOURCES_FILE" > "$ISO_SOURCES_FILE.tmp"
+    mv "$ISO_SOURCES_FILE.tmp" "$ISO_SOURCES_FILE"
+done
 
 # --- gentoo ---
 GENTOO_BASE="https://distfiles.gentoo.org/releases/arm64/autobuilds"
@@ -44,12 +51,10 @@ GENTOO_SHA=$(curl -fsSL "$GENTOO_URL.sha256" \
 require_sha256 "$GENTOO_SHA" "gentoo"
 echo "gentoo: $GENTOO_FILENAME sha256 $GENTOO_SHA"
 
-jq --arg nsha "$NIXOS_SHA" \
-   --arg gurl "$GENTOO_URL" \
+jq --arg gurl "$GENTOO_URL" \
    --arg gfile "$GENTOO_FILENAME" \
    --arg gsha "$GENTOO_SHA" \
-   '."nixos-25-11".sha256 = $nsha
-    | .gentoo.url = $gurl
+   '.gentoo.url = $gurl
     | .gentoo.filename = $gfile
     | .gentoo.sha256 = $gsha' \
    "$ISO_SOURCES_FILE" > "$ISO_SOURCES_FILE.tmp"

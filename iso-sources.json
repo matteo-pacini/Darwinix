@@ -1,8 +1,13 @@
 {
-  "nixos-25-11": {
-    "url": "https://channels.nixos.org/nixos-25.11/latest-nixos-minimal-aarch64-linux.iso",
-    "filename": "nixos-minimal-aarch64-linux.iso",
-    "sha256": "162b1d9f2cbf6eafa63f584d730e220a0bb31c17b2fbb17b25dab198d59210be"
+  "nixos-26-05": {
+    "url": "https://channels.nixos.org/nixos-26.05/latest-nixos-minimal-aarch64-linux.iso",
+    "filename": "nixos-minimal-26.05-aarch64-linux.iso",
+    "sha256": "fa30215dbba3e9177e767c08c07f40d46bbfb43e89b426a9ea3050ffa8f7107c"
+  },
+  "nixos-unstable": {
+    "url": "https://channels.nixos.org/nixos-unstable/latest-nixos-minimal-aarch64-linux.iso",
+    "filename": "nixos-minimal-unstable-aarch64-linux.iso",
+    "sha256": "724965ef8cca51bd56729021b548a598171daea59d3dc2a66e86a46bf7228c18"
   },
   "ubuntu-25-10": {
     "url": "https://cdimage.ubuntu.com/ubuntu/releases/25.10/release/ubuntu-25.10-desktop-arm64.iso",

@@ -8,7 +8,8 @@ Darwinix supports the following Linux distributions:
 
 | OS | Version | Command | ISO Source |
 |---|---|---|---|
-| **NixOS** | 25.11 (Minimal) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11` | Downloaded at runtime from NixOS |
+| **NixOS** | 26.05 (Minimal) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-26-05` | Downloaded at runtime from NixOS |
+| **NixOS** | Unstable (Minimal) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-unstable` | Downloaded at runtime from NixOS |
 | **Ubuntu** | 25.10 (Desktop) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- ubuntu-25-10` | Downloaded at runtime from CDImage |
 | **Fedora** | Workstation 42 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-42` | Downloaded at runtime from Fedora |
 | **Fedora** | Workstation 43 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-43` | Downloaded at runtime from Fedora |
@@ -23,7 +24,7 @@ ISO downloads are verified against SHA-256 checksums pinned in `iso-sources.json
 You can spawn a VM by specifying the distribution name as an argument. For example, to create a NixOS VM:
 
 ```
-nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11
+nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-26-05
 ```
 
 This command will create the necessary VM files locally if they are not found (e.g., EFI, EFI varstore, disk, etc.) and then start the VM.
@@ -35,7 +36,7 @@ This command will create the necessary VM files locally if they are not found (e
 You can pass additional arguments directly to QEMU after the distribution name. For example:
 
 ```
-nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11 -cdrom "/path/to/image.iso"
+nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-26-05 -cdrom "/path/to/image.iso"
 ```
 
 VMs come with internet access and audio support.
@@ -51,8 +52,8 @@ ssh -p 2222 <user>@127.0.0.1
 Customize or disable with the `HOSTFWD` environment variable:
 
 ```
-HOSTFWD="hostfwd=tcp::2222-:22,hostfwd=tcp::8080-:80" nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11
-HOSTFWD="" nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11   # disable
+HOSTFWD="hostfwd=tcp::2222-:22,hostfwd=tcp::8080-:80" nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-26-05
+HOSTFWD="" nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-26-05   # disable
 ```
 
 **Note**: each forwarded host port can only be bound by one VM at a time — for a second concurrent VM, pick different ports or set `HOSTFWD=""`.
@@ -66,7 +67,7 @@ nix run "github:matteo-pacini/darwinix#linux-vm" -- --help
 Example:
 
 ```
-CORES=2 RAM=4 nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11
+CORES=2 RAM=4 nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-26-05
 ```
 
 #### Disk Size Configuration
@@ -74,7 +75,7 @@ CORES=2 RAM=4 nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11
 Use the `DISK_SIZE` environment variable to set the initial disk size (default: `512G`). This only applies when creating the disk for the first time:
 
 ```
-DISK_SIZE=1T nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-25-11
+DISK_SIZE=1T nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-26-05
 ```
 
 **Note**: Once the disk is created, changing `DISK_SIZE` won't affect it. If you want a different size, delete the `disk.qcow2` file and run the command again.

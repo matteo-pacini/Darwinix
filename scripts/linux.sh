@@ -47,7 +47,8 @@ usage() {
     echo "Usage: nix run \"github:matteo-pacini/darwinix#linux-vm\" -- <distribution> [extra qemu options]"
     echo
     echo "Available distributions:"
-    echo "  nixos-25-11             - NixOS 25.11 Minimal"
+    echo "  nixos-26-05             - NixOS 26.05 Minimal"
+    echo "  nixos-unstable          - NixOS Unstable Minimal"
     echo "  ubuntu-25-10            - Ubuntu 25.10 Desktop"
     echo "  fedora-workstation-42   - Fedora Workstation 42"
     echo "  fedora-workstation-43   - Fedora Workstation 43"
@@ -76,7 +77,7 @@ for arg in "$@"; do
 done
 
 # First argument is the distribution unless it looks like a QEMU flag
-DISTRIBUTION="nixos-25-11"
+DISTRIBUTION="nixos-26-05"
 if [ $# -gt 0 ]; then
     case "$1" in
         ""|-*) ;;
