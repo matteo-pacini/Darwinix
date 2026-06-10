@@ -10,12 +10,15 @@ Darwinix supports the following Linux distributions:
 |---|---|---|---|
 | **NixOS** | 26.05 (Minimal) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-26-05` | Downloaded at runtime from NixOS |
 | **NixOS** | Unstable (Minimal) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- nixos-unstable` | Downloaded at runtime from NixOS |
-| **Ubuntu** | 25.10 (Desktop) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- ubuntu-25-10` | Downloaded at runtime from CDImage |
-| **Fedora** | Workstation 42 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-42` | Downloaded at runtime from Fedora |
+| **Ubuntu** | 26.04 LTS (Desktop) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- ubuntu-26-04` | Downloaded at runtime from CDImage |
+| **Debian** | Stable (netinst, latest point release) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- debian` | Downloaded at runtime from Debian |
 | **Fedora** | Workstation 43 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-43` | Downloaded at runtime from Fedora |
+| **Fedora** | Workstation 44 | `nix run "github:matteo-pacini/darwinix#linux-vm" -- fedora-workstation-44` | Downloaded at runtime from Fedora |
+| **openSUSE** | Tumbleweed (DVD) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- opensuse-tumbleweed` | Downloaded at runtime from openSUSE |
+| **Alpine** | Latest stable (virt) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- alpine` | Downloaded at runtime from Alpine |
 | **Gentoo** | Minimal (latest autobuild) | `nix run "github:matteo-pacini/darwinix#linux-vm" -- gentoo` | Downloaded at runtime from Gentoo |
 
-ISO downloads are verified against SHA-256 checksums pinned in `iso-sources.json`. Rolling sources (NixOS channel, Gentoo autobuilds) are refreshed weekly by CI.
+ISO downloads are verified against SHA-256 checksums pinned in `iso-sources.json`. Rolling sources (NixOS channels, Debian point releases, openSUSE Tumbleweed, Alpine, Gentoo autobuilds) are refreshed weekly by CI.
 
 ## Usage
 

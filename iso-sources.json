@@ -9,20 +9,35 @@
     "filename": "nixos-minimal-unstable-aarch64-linux.iso",
     "sha256": "724965ef8cca51bd56729021b548a598171daea59d3dc2a66e86a46bf7228c18"
   },
-  "ubuntu-25-10": {
-    "url": "https://cdimage.ubuntu.com/ubuntu/releases/25.10/release/ubuntu-25.10-desktop-arm64.iso",
-    "filename": "ubuntu-25.10-desktop-arm64.iso",
-    "sha256": "9d383dd57220dec520fdec3be05da258d27d435c02fe6e296c5d0a505741a787"
+  "ubuntu-26-04": {
+    "url": "https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ubuntu-26.04-desktop-arm64.iso",
+    "filename": "ubuntu-26.04-desktop-arm64.iso",
+    "sha256": "c2afd538d66fdd77377d03f1ed2ac76a34f1c116baecc9a8170d68f833121f57"
   },
-  "fedora-workstation-42": {
-    "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/42/Workstation/aarch64/iso/Fedora-Workstation-Live-42-1.1.aarch64.iso",
-    "filename": "Fedora-Workstation-Live-42-1.1.aarch64.iso",
-    "sha256": "954a0d7d6553fdf2b6bcf7f393a2e41f9265a0a81de8c8e4f712f5924e40577f"
+  "debian": {
+    "url": "https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/debian-13.5.0-arm64-netinst.iso",
+    "filename": "debian-13.5.0-arm64-netinst.iso",
+    "sha256": "3f8211e759d19370d50e1d853859b66ecba62700d712214a8a65ed26c6d08ecc"
   },
   "fedora-workstation-43": {
     "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/43/Workstation/aarch64/iso/Fedora-Workstation-Live-43-1.6.aarch64.iso",
     "filename": "Fedora-Workstation-Live-43-1.6.aarch64.iso",
     "sha256": "73e91eb64022b59ed0b19fb706dc2053034dc0abbaec03f59fc7754a29777cfb"
+  },
+  "fedora-workstation-44": {
+    "url": "https://download.fedoraproject.org/pub/fedora/linux/releases/44/Workstation/aarch64/iso/Fedora-Workstation-Live-44-1.7.aarch64.iso",
+    "filename": "Fedora-Workstation-Live-44-1.7.aarch64.iso",
+    "sha256": "162ba3c552a2d241c7c63ec26777af0255ee1b5a135adc0be986ceed999933ef"
+  },
+  "opensuse-tumbleweed": {
+    "url": "https://download.opensuse.org/ports/aarch64/tumbleweed/iso/openSUSE-Tumbleweed-DVD-aarch64-Current.iso",
+    "filename": "openSUSE-Tumbleweed-DVD-aarch64-Current.iso",
+    "sha256": "c6fbf637f891b0afc9a62614ef0a6679582e6cec448bc5535e9061118837fcfc"
+  },
+  "alpine": {
+    "url": "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/aarch64/alpine-virt-3.24.0-aarch64.iso",
+    "filename": "alpine-virt-3.24.0-aarch64.iso",
+    "sha256": "834469887c99227230e981cc8a5b66571f5eab98f12c6a675f9ea0dd640b7866"
   },
   "gentoo": {
     "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260607T234631Z/install-arm64-minimal-20260607T234631Z.iso",
