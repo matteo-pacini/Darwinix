@@ -4,6 +4,7 @@ set -euo pipefail
 
 STORE_PATH=@@store-path@@
 QEMU_SHARE=@@qemu-share@@
+ISO_CONFIG_FILE="$STORE_PATH/share/iso-sources.json"
 
 # Half of the cores, + 1 if odd
 _CORES=$(
@@ -47,28 +48,25 @@ usage() {
     echo "Usage: nix run \"github:matteo-pacini/darwinix#linux-vm\" -- <distribution> [extra qemu options]"
     echo
     echo "Available distributions:"
-    echo "  nixos-26-05             - NixOS 26.05 Minimal"
-    echo "  nixos-unstable          - NixOS Unstable Minimal"
-    echo "  ubuntu-26-04            - Ubuntu 26.04 LTS Desktop"
-    echo "  debian                  - Debian Stable netinst (latest point release)"
-    echo "  fedora-workstation-43   - Fedora Workstation 43"
-    echo "  fedora-workstation-44   - Fedora Workstation 44"
-    echo "  opensuse-tumbleweed     - openSUSE Tumbleweed DVD"
-    echo "  alpine                  - Alpine Linux virt (latest stable)"
-    echo "  gentoo                  - Gentoo Minimal (latest autobuild)"
+    jq -r 'keys[]' "$ISO_CONFIG_FILE" | sed 's/^/  /'
     echo
     echo "Environment variables:"
     echo "  CORES: number of cores to use (default: $_CORES)"
     echo "  RAM: amount of RAM to use in GB (default: $_RAM)"
-    echo "  GRAPHICS: enable graphics support (default: 1)"
-    echo "  AUDIO: enable audio support (default: 1)"
-    echo "  NETWORK: enable network support (default: 1)"
-    echo "  COMPRESS: compress disk image after shutdown (default: 0)"
-    echo "  SNAPSHOT: run without committing disk changes (default: 0)"
-    echo "  DEBUG: enable debug logging (default: 0)"
+    echo "  GRAPHICS: enable graphics support (0 or 1, default: 1)"
+    echo "  AUDIO: enable audio support (0 or 1, default: 1)"
+    echo "  NETWORK: enable network support (0 or 1, default: 1)"
+    echo "  COMPRESS: compress disk image after shutdown (0 or 1, default: 0)"
+    echo "  SNAPSHOT: run without committing disk changes (0 or 1, default: 0)"
+    echo "  DEBUG: enable debug logging (0 or 1, default: 0)"
     echo "  DISK_SIZE: initial disk size (default: 512G, only used when disk is first created)"
     echo "  HOSTFWD: user-mode port forwards for the netdev (default: hostfwd=tcp::2222-:22, set to \"\" to disable)"
 }
+
+if [ ! -f "$ISO_CONFIG_FILE" ]; then
+    error "ISO sources configuration file not found at $ISO_CONFIG_FILE"
+    exit 1
+fi
 
 for arg in "$@"; do
     case "$arg" in
@@ -118,12 +116,12 @@ if [ -n "$HOSTFWD" ] && ! [[ "$HOSTFWD" =~ ^hostfwd=[^[:space:]]+$ ]]; then
     exit 1
 fi
 
-clear
+if [ -t 1 ]; then
+    clear
+fi
 
 info "Starting ${DISTRIBUTION} VM..."
 info "Using $CORES cores and $RAM GB of RAM"
-
-sleep 1
 
 # EFI firmware code is read directly from the QEMU package; only the
 # variable store needs a local writable copy
@@ -138,12 +136,6 @@ fi
 
 # Handle ISO based on distribution - all distributions fetch ISO at runtime
 ISO_PATH=""
-ISO_CONFIG_FILE="$STORE_PATH/share/iso-sources.json"
-
-if [ ! -f "$ISO_CONFIG_FILE" ]; then
-    error "ISO sources configuration file not found at $ISO_CONFIG_FILE"
-    exit 1
-fi
 
 # Look up distribution in JSON configuration
 ISO_ENTRY=$(jq -r --arg dist "$DISTRIBUTION" '.[$dist]' "$ISO_CONFIG_FILE" 2>/dev/null)
@@ -295,7 +287,7 @@ if [ "$SNAPSHOT" -eq 1 ]; then
     args+=(-snapshot)
 fi
 
-info "QEMU command: qemu-system-aarch64 ${args[*]} $*"
+debug "QEMU command: qemu-system-aarch64 ${args[*]} $*"
 
 qemu-system-aarch64 "${args[@]}" "$@"
 

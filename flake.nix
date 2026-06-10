@@ -12,27 +12,9 @@
     }:
     let
       pkgs = import nixpkgs { system = "aarch64-darwin"; };
-      optimizedForAppleSilicon =
-        pkg:
-        pkg.overrideAttrs (oldAttrs: {
-          env = (oldAttrs.env or { }) // {
-            NIX_CFLAGS_COMPILE = (oldAttrs.env.NIX_CFLAGS_COMPILE or "") + " -O2 -mcpu=apple-m1";
-            NIX_CXXFLAGS_COMPILE = (oldAttrs.env.NIX_CFLAGS_COMPILE or "") + " -O2 -mcpu=apple-m1";
-          };
-        });
-
-      qemu = (
-        optimizedForAppleSilicon (
-          pkgs.qemu.override {
-            hostCpuOnly = true;
-          }
-        )
-      );
 
       # Generic Linux VM package that supports all distributions
-      linuxVM = pkgs.callPackage ./vms/linux.nix {
-        inherit qemu;
-      };
+      linuxVM = pkgs.callPackage ./vms/linux.nix { };
     in
     {
       packages.aarch64-darwin = {
