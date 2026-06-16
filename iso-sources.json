@@ -7,7 +7,7 @@
   "nixos-unstable": {
     "url": "https://channels.nixos.org/nixos-unstable/latest-nixos-minimal-aarch64-linux.iso",
     "filename": "nixos-minimal-unstable-aarch64-linux.iso",
-    "sha256": "724965ef8cca51bd56729021b548a598171daea59d3dc2a66e86a46bf7228c18"
+    "sha256": "1e914af4b0a0a32d10b789102789ab134f8c0985fb25424068960dbba9e5269f"
   },
   "ubuntu-26-04": {
     "url": "https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ubuntu-26.04-desktop-arm64.iso",
