@@ -2,12 +2,12 @@
   "nixos-26-05": {
     "url": "https://channels.nixos.org/nixos-26.05/latest-nixos-minimal-aarch64-linux.iso",
     "filename": "nixos-minimal-26.05-aarch64-linux.iso",
-    "sha256": "fa30215dbba3e9177e767c08c07f40d46bbfb43e89b426a9ea3050ffa8f7107c"
+    "sha256": "a8b781d64d540f528dbfe7c5060c4f17fb9a35842d23118d168e340da115c5c7"
   },
   "nixos-unstable": {
     "url": "https://channels.nixos.org/nixos-unstable/latest-nixos-minimal-aarch64-linux.iso",
     "filename": "nixos-minimal-unstable-aarch64-linux.iso",
-    "sha256": "1e914af4b0a0a32d10b789102789ab134f8c0985fb25424068960dbba9e5269f"
+    "sha256": "86c2b9fea2b7eb7469d62cbe941fcc26a0cf7b2f3ae8f5c1fd31c81b0551c9f8"
   },
   "ubuntu-26-04": {
     "url": "https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ubuntu-26.04-desktop-arm64.iso",
@@ -32,16 +32,16 @@
   "opensuse-tumbleweed": {
     "url": "https://download.opensuse.org/ports/aarch64/tumbleweed/iso/openSUSE-Tumbleweed-DVD-aarch64-Current.iso",
     "filename": "openSUSE-Tumbleweed-DVD-aarch64-Current.iso",
-    "sha256": "c6fbf637f891b0afc9a62614ef0a6679582e6cec448bc5535e9061118837fcfc"
+    "sha256": "5a07bb1c354a65ed93c7574058db77ff1e5a9d5ae48f99618d84993aabd1ba72"
   },
   "alpine": {
-    "url": "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/aarch64/alpine-virt-3.24.0-aarch64.iso",
-    "filename": "alpine-virt-3.24.0-aarch64.iso",
-    "sha256": "834469887c99227230e981cc8a5b66571f5eab98f12c6a675f9ea0dd640b7866"
+    "url": "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/aarch64/alpine-virt-3.24.1-aarch64.iso",
+    "filename": "alpine-virt-3.24.1-aarch64.iso",
+    "sha256": "c81699152db11d2a6dbb7d75348d632fcf5811eff414d7e71876a8bb6d48bc02"
   },
   "gentoo": {
-    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260607T234631Z/install-arm64-minimal-20260607T234631Z.iso",
-    "filename": "install-arm64-minimal-20260607T234631Z.iso",
-    "sha256": "4c738d898d4f32d0ba81da0ee8161405832f140bbef48943ddf675d9ba2bbc76"
+    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260614T234629Z/install-arm64-minimal-20260614T234629Z.iso",
+    "filename": "install-arm64-minimal-20260614T234629Z.iso",
+    "sha256": "11324d4b06a4a11035c0eaccd9b17e4ebf94a138e165410609996d3a9184c5ad"
   }
 }
