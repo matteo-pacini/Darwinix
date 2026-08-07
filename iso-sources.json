@@ -2,12 +2,12 @@
   "nixos-26-05": {
     "url": "https://channels.nixos.org/nixos-26.05/latest-nixos-minimal-aarch64-linux.iso",
     "filename": "nixos-minimal-26.05-aarch64-linux.iso",
-    "sha256": "9beafbd782683c37b607c1a4363034fc445ed1ef7042abb5bc01b0fb3f294a91"
+    "sha256": "3913df28aeba6130225ab1d14a2647027cacff6384b54f31abae83ed7a8675b2"
   },
   "nixos-unstable": {
     "url": "https://channels.nixos.org/nixos-unstable/latest-nixos-minimal-aarch64-linux.iso",
     "filename": "nixos-minimal-unstable-aarch64-linux.iso",
-    "sha256": "337fc16cf0d593b9e25ea191e9a18ac7418c6c96b324038ffdac54a4ae37cdef"
+    "sha256": "409abd5413d3ce458a1296d6aaf1940f276f337e4709b59e1d01856285054593"
   },
   "ubuntu-26-04": {
     "url": "https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ubuntu-26.04-desktop-arm64.iso",
@@ -32,7 +32,7 @@
   "opensuse-tumbleweed": {
     "url": "https://download.opensuse.org/ports/aarch64/tumbleweed/iso/openSUSE-Tumbleweed-DVD-aarch64-Current.iso",
     "filename": "openSUSE-Tumbleweed-DVD-aarch64-Current.iso",
-    "sha256": "c3cc21aa92ac1ffee1a4d087de3cd1d5e94a976b1ed1fceceba43a9a170e3066"
+    "sha256": "f5a65b983c374ea8e544d65d999b4c828b111643f1152258437f0f63a6dbb7b0"
   },
   "alpine": {
     "url": "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases/aarch64/alpine-virt-3.24.1-aarch64.iso",
@@ -40,8 +40,8 @@
     "sha256": "c81699152db11d2a6dbb7d75348d632fcf5811eff414d7e71876a8bb6d48bc02"
   },
   "gentoo": {
-    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260726T221557Z/install-arm64-minimal-20260726T221557Z.iso",
-    "filename": "install-arm64-minimal-20260726T221557Z.iso",
-    "sha256": "4c8de5c31e86c39eec797912d659c15b66d64395c409371244456e827afcbc59"
+    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260802T233105Z/install-arm64-minimal-20260802T233105Z.iso",
+    "filename": "install-arm64-minimal-20260802T233105Z.iso",
+    "sha256": "9fe37ecd261116781dd1fea8bca1427eef5a455f1b2c142735530dcdd7dafaa7"
   }
 }
