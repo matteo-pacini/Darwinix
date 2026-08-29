@@ -2,12 +2,12 @@
   "nixos-26-05": {
     "url": "https://channels.nixos.org/nixos-26.05/latest-nixos-minimal-aarch64-linux.iso",
     "filename": "nixos-minimal-26.05-aarch64-linux.iso",
-    "sha256": "0f7325155e82f318064cdbec57147dd58c6b70bb8dcff8e7add4b3a54625e9be"
+    "sha256": "c7829831df23137558f0ed16375050fd4ca876f04d710577f32fe927af8af835"
   },
   "nixos-unstable": {
     "url": "https://channels.nixos.org/nixos-unstable/latest-nixos-minimal-aarch64-linux.iso",
     "filename": "nixos-minimal-unstable-aarch64-linux.iso",
-    "sha256": "8099a3194b9259eb22889255173e564260e84f565ebed58077e0e4d2d25806c2"
+    "sha256": "324dc7b36831a3668abd3f11d38cca8124f412cbbf2cf5146d69ca6d5effbb7b"
   },
   "ubuntu-26-04": {
     "url": "https://cdimage.ubuntu.com/ubuntu/releases/26.04/release/ubuntu-26.04-desktop-arm64.iso",
@@ -40,8 +40,8 @@
     "sha256": "c81699152db11d2a6dbb7d75348d632fcf5811eff414d7e71876a8bb6d48bc02"
   },
   "gentoo": {
-    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260816T204555Z/install-arm64-minimal-20260816T204555Z.iso",
-    "filename": "install-arm64-minimal-20260816T204555Z.iso",
-    "sha256": "48e02dbcd3ad679ee861a526eede4123b31f825d7e59fbbe0a4d34fdb4c8418f"
+    "url": "https://distfiles.gentoo.org/releases/arm64/autobuilds/20260823T234554Z/install-arm64-minimal-20260823T234554Z.iso",
+    "filename": "install-arm64-minimal-20260823T234554Z.iso",
+    "sha256": "eb64f190e1c91eb66c88815fda91860dd676d25a09b73edbf5746021e22b54f1"
   }
 }
